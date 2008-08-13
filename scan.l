@@ -7,11 +7,12 @@ IS			(u|U|l|L)*
 
 %{
 #include <stdio.h>
+#include <string.h>
 #include "gram.tab.h"
 
-void count();
-void comment();
-int check_type();
+static void count();
+static void comment();
+static int check_type();
 %}
 
 %%
@@ -135,19 +136,27 @@ loop:
 		putchar(c1);
 }
 
-int offset = 0;
+#define MAXTOKS		1024
 
-void count()
+long token_starts[MAXTOKS];
+long token_count = 0;
+long token_offset = 0;
+
+void last_token_location(int count, long *start, long *end)
 {
-	int i;
+	*start = token_starts[token_count - count];
+	token_count = token_count - count + 1;
+	*end = token_offset;
+}
 
-	for (i = 0; yytext[i] != '\0'; i++)
-		offset++;
-
+static void count()
+{
+	token_starts[token_count++] = token_offset;
+	token_offset += strlen(yytext);
 	ECHO;
 }
 
-int check_type()
+static int check_type()
 {
 	/* is it TYPE_NAME or IDENTIFIER? */
 	return(IDENTIFIER);

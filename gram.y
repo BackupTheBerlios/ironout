@@ -1,8 +1,27 @@
 %{
 #include <stdio.h>
 
+
+struct YYLTYPE {
+	long start;
+	long end;
+};
+
+#define YYLTYPE		struct YYLTYPE
+
 void yyerror(char *s);
 int yylex();
+void last_token_location(int count, long *start, long *end);
+
+#define YYLLOC_DEFAULT(Current, Rhs, N)					\
+	do								\
+		if (0 && N) {						\
+			(Current).start = YYRHSLOC(Rhs, 1).start;	\
+			(Current).end = YYRHSLOC(Rhs, N).end;		\
+		} else {						\
+			last_token_location(N, &(Current).start, &(Current).end); \
+		}							\
+	while (0)
 
 %}
 %token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
