@@ -1,9 +1,13 @@
+#include <stdio.h>
 #include "parse.h"
 
 
-int yyparse();
-
-int parse()
+int parse(char *filename)
 {
-	return yyparse();
+	int result;
+	FILE *file = fopen(filename, "r");
+	yyrestart(file);
+	result = yyparse();
+	fclose(file);
+	return result;
 }
