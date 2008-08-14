@@ -432,6 +432,8 @@ identifier
 
 void yyerror(char *s)
 {
+	long start, end;
 	fflush(stdout);
-	printf("parsing error: %s\n", s);
+	last_token_location(1, &start, &end);
+	printf("parsing error on (%ld, %ld): %s\n", start, end, s);
 }
