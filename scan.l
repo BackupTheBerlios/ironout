@@ -8,7 +8,7 @@ IS			(u|U|l|L)*
 %{
 #include <stdio.h>
 #include <string.h>
-#include "gram.tab.h"
+#include "parse.h"
 
 static void count();
 static void comment();
@@ -137,10 +137,13 @@ loop:
 }
 
 #define MAXTOKS		1024
+#define MAXTOKLEN	4 * 1024
 
 long token_starts[MAXTOKS];
+char token_str[MAXTOKLEN];
 long token_count = 0;
 long token_offset = 0;
+extern YYSTYPE yylval;
 
 void last_token_location(int count, long *start, long *end)
 {
@@ -153,6 +156,8 @@ static void count()
 {
 	token_starts[token_count++] = token_offset;
 	token_offset += strlen(yytext);
+	strcpy(token_str, yytext);
+	yylval = token_str;
 	ECHO;
 }
 
