@@ -9,5 +9,6 @@ int parse(char *filename)
 	yyrestart(file);
 	result = yyparse();
 	fclose(file);
+	reset_tokenizer();
 	return result;
 }

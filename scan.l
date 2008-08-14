@@ -161,3 +161,9 @@ static int check_type()
 	/* is it TYPE_NAME or IDENTIFIER? */
 	return(IDENTIFIER);
 }
+
+void reset_tokenizer()
+{
+	token_count = 0;
+	token_offset = 0;
+}
