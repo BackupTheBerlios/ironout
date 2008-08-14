@@ -125,7 +125,6 @@ void comment()
 {
 	char c, o = '\0';
 	while ((c = input())) {
-		putchar(c);
 		if (o == '*' && c == '/')
 			break;
 		o = c;
@@ -153,7 +152,6 @@ static void count()
 	token_offset += strlen(yytext);
 	strcpy(token_str, yytext);
 	yylval = token_str;
-	ECHO;
 }
 
 static int check_type()
