@@ -12,6 +12,7 @@ IS			(u|U|l|L)*
 
 static void count();
 static void comment();
+static void macro();
 static int check_type();
 %}
 
@@ -122,18 +123,13 @@ int yywrap()
 
 void comment()
 {
-	char c, c1;
-loop:
-	while ((c = input()) != '*' && c != 0)
+	char c, o = '\0';
+	while ((c = input())) {
 		putchar(c);
-
-	if ((c1 = input()) != '/' && c != 0) {
-		unput(c1);
-		goto loop;
+		if (o == '*' && c == '/')
+			break;
+		o = c;
 	}
-
-	if (c != 0)
-		putchar(c1);
 }
 
 #define MAXTOKS		1024
