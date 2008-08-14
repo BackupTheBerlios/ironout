@@ -17,13 +17,15 @@ gram.tab.c: gram.y
 scan.c: scan.l
 	$(LEX) $(LFLAGS) -t $< >$@
 
-scan.o: gram.tab.h
-
+parse.h: gram.tab.h
+parse.o: parse.h
+scan.o: parse.h
 .c.o:
 	$(CC) -c $(CFLAGS) $<
-
 parse: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 clean:
 	rm -f *.tab.[ch] scan.c *.output *.o
+ctags:
+	etags *.[hc]
