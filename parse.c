@@ -1,8 +1,9 @@
 #include "parse.h"
 
 
-int main()
+int yyparse();
+
+int parse()
 {
-	int yyparse();
 	return yyparse();
 }

@@ -7,22 +7,20 @@ LDFLAGS = -s
 LFLAGS =
 YFLAGS = -dv
 
-OBJS = gram.tab.o scan.o parse.o
+OBJS = gram.tab.o scan.o parse.o ironout.o
 
-all: parse
-
-gram.tab.c: gram.y
-	$(YACC) $(YFLAGS) $<
-
-scan.c: scan.l
-	$(LEX) $(LFLAGS) -t $< >$@
+all: ironout
 
 parse.h: gram.tab.h
 parse.o: parse.h
 scan.o: parse.h
+gram.tab.c: gram.y
+	$(YACC) $(YFLAGS) $<
+scan.c: scan.l
+	$(LEX) $(LFLAGS) -t $< >$@
 .c.o:
 	$(CC) -c $(CFLAGS) $<
-parse: $(OBJS)
+ironout: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 clean:
