@@ -12,6 +12,8 @@ int parse(char *filename)
 {
 	int result;
 	FILE *file = fopen(filename, "r");
+	if (!file)
+		return -1;
 	yyrestart(file);
 	result = yyparse();
 	fclose(file);
