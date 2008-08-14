@@ -12,7 +12,6 @@ IS			(u|U|l|L)*
 
 static void count();
 static void comment();
-static void macro();
 static int check_type();
 %}
 
@@ -64,6 +63,7 @@ static int check_type();
 {D}+"."{D}*({E})?{FS}?	{ count(); return(CONSTANT); }
 
 \"(\\.|[^\\"])*\"	{ count(); return(STRING_LITERAL); }
+#([^\n]|\\\n)+	{ count(); return(MACRO); }
 
 ">>="			{ count(); return(RIGHT_ASSIGN); }
 "<<="			{ count(); return(LEFT_ASSIGN); }

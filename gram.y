@@ -3,7 +3,7 @@
 #include "parse.h"
 
 %}
-%token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
+%token IDENTIFIER CONSTANT STRING_LITERAL MACRO SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
@@ -342,6 +342,7 @@ statement
 	| selection_statement
 	| iteration_statement
 	| jump_statement
+	| macro
 	;
 
 labeled_statement
@@ -407,6 +408,7 @@ file
 external_definition
 	: function_definition
 	| declaration
+	| macro
 	;
 
 function_definition
@@ -417,6 +419,10 @@ function_definition
 function_body
 	: compound_statement
 	| declaration_list compound_statement
+	;
+
+macro
+	: MACRO
 	;
 
 identifier
