@@ -1,4 +1,4 @@
-int yyparse();
+#include "parse.h"
 
 
 int main()
