@@ -143,7 +143,6 @@ long token_starts[MAXTOKS];
 char token_str[MAXTOKLEN];
 long token_count = 0;
 long token_offset = 0;
-extern YYSTYPE yylval;
 
 void last_token_location(int count, long *start, long *end)
 {
