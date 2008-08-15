@@ -11,6 +11,7 @@ IS			(u|U|l|L)*
 #include "parse.h"
 
 static void count();
+static void ignore();
 static void comment();
 static int check_type();
 %}
@@ -111,7 +112,7 @@ static int check_type();
 "|"			{ count(); return('|'); }
 "?"			{ count(); return('?'); }
 
-[ \t\v\n\f]		{ count(); }
+[ \t\v\n\f]		{ ignore(); }
 .			{ /* ignore bad characters */ }
 
 %%
@@ -131,27 +132,23 @@ void comment()
 	}
 }
 
-#define MAXTOKS		1024
 #define MAXTOKLEN	4 * 1024
 
-long token_starts[MAXTOKS];
 char token_str[MAXTOKLEN];
-long token_count = 0;
 long token_offset = 0;
-
-void last_token_location(int count, long *start, long *end)
-{
-	*start = token_starts[token_count - count];
-	token_count = token_count - count + 1;
-	*end = token_offset;
-}
 
 static void count()
 {
-	token_starts[token_count++] = token_offset;
+	yylloc.start = token_offset;
 	token_offset += strlen(yytext);
 	strcpy(token_str, yytext);
 	yylval = token_str;
+	yylloc.end = token_offset;
+}
+
+static void ignore()
+{
+	token_offset += strlen(yytext);
 }
 
 static int check_type()
@@ -162,6 +159,5 @@ static int check_type()
 
 void reset_tokenizer()
 {
-	token_count = 0;
 	token_offset = 0;
 }

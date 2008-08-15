@@ -596,8 +596,7 @@ identifier
 
 void yyerror(char *s)
 {
-	long start, end;
+	extern long token_offset;
 	fflush(stdout);
-	last_token_location(1, &start, &end);
-	printf("parsing error on (%ld, %ld): %s\n", start, end, s);
+	printf("parsing error on %ld: %s\n", token_offset, s);
 }

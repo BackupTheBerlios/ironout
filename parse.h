@@ -5,11 +5,11 @@
 #define YYSTYPE char*
 #define YYLLOC_DEFAULT(Current, Rhs, N)					\
 	do								\
-		if (0 && N) {						\
+		if (N) {						\
 			(Current).start = YYRHSLOC(Rhs, 1).start;	\
 			(Current).end = YYRHSLOC(Rhs, N).end;		\
 		} else {						\
-			last_token_location(N, &(Current).start, &(Current).end); \
+			printf("WARNING: couldn't find location!\n");	\
 		}							\
 	while (0)
 
@@ -23,7 +23,6 @@ int yylex();
 void yyrestart(FILE *filename);
 int yyparse();
 
-void last_token_location(int count, long *start, long *end);
 void reset_tokenizer();
 
 #include "gram.tab.h"
