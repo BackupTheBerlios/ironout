@@ -11,6 +11,7 @@ OBJS = cyacc.o clex.o parse.o ironout.o
 
 all: ironout
 
+parse.o: parse.h ast.h utils.h
 cyacc.c: cyacc.y
 	$(YACC) $(YFLAGS) -o $@ $<
 clex.c: clex.l
