@@ -25,7 +25,7 @@ int yyparse();
 
 void reset_tokenizer();
 
-#include "gram.tab.h"
+#include "cyacc.h"
 #include "ast.h"
 
 void push_node(enum nodetype type, long start, long end, int nchild);
