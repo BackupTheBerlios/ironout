@@ -5,7 +5,7 @@ LEX = flex
 CFLAGS = -std=c99 -pedantic -Wall -O2
 LDFLAGS = -s
 LFLAGS =
-YFLAGS = -dv
+YFLAGS = -d
 
 OBJS = cyacc.o clex.o parse.o ironout.o
 
