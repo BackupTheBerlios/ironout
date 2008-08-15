@@ -12,13 +12,11 @@ IS			(u|U|l|L)*
 
 static void count();
 static void ignore();
-static void comment();
 static int check_type();
 %}
 
 %%
-"/*"			{ comment(); }
-
+"/*"([^\\*]|\\*[^/])*"*/"	{ ignore(); }
 "auto"			{ count(); return(AUTO); }
 "break"			{ count(); return(BREAK); }
 "case"			{ count(); return(CASE); }
@@ -120,16 +118,6 @@ static int check_type();
 int yywrap()
 {
 	return 1;
-}
-
-void comment()
-{
-	char c, o = '\0';
-	while ((c = input())) {
-		if (o == '*' && c == '/')
-			break;
-		o = c;
-	}
 }
 
 #define MAXTOKLEN	4 * 1024
