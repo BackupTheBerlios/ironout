@@ -113,14 +113,18 @@ void node_at(struct node *node, long offset)
 {
 	struct node *cur = node;
 	int i;
-	for (;;) {
-		printf("%d: %ld, %ld\n", cur->type, cur->start, cur->end);
-		for (i = 0; i < cur->count; i++)
+	int found = 1;
+	while (found) {
+		found = 0;
+		for (i = 0; i < cur->count; i++) {
 			if (cur->children[i]->start <= offset &&
 			    offset < cur->children[i]->end) {
 				cur = cur->children[i];
-				continue;
+				found = 1;
+				break;
 			}
-		return;
+		}
 	}
+	if (cur->type == AST_IDENTIFIER)
+		printf("identifier found!\n");
 }
