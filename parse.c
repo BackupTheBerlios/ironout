@@ -24,16 +24,18 @@ struct node *parse(char *filename)
 
 void push_node(enum nodetype type, long start, long end, int nchild)
 {
-	int i = 0;
 	struct node *node = malloc(sizeof(struct node));
 	memset(node, 0, sizeof(struct node));
 	node->type = type;
 	node->start = start;
 	node->end = end;
-	node->count = nchild;
-	node->children = malloc(nchild * sizeof(struct node *));
-	for (i = 0; i < nchild; i++)
-		node->children[i] = nodestack[--nodecount];
+	if (nchild) {
+		int i;
+		node->count = nchild;
+		node->children = malloc(nchild * sizeof(struct node *));
+		for (i = 0; i < nchild; i++)
+			node->children[i] = nodestack[--nodecount];
+	}
 	nodestack[nodecount++] = node;
 }
 
