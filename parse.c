@@ -8,19 +8,18 @@
 static struct node *nodestack[1024];
 static int nodecount = 0;
 
-int parse(char *filename)
+struct node *parse(char *filename)
 {
-	int result;
 	FILE *file = fopen(filename, "r");
 	if (!file)
-		return -1;
+		return NULL;
 	yyrestart(file);
-	result = yyparse();
+	yyparse();
 	fclose(file);
 	reset_tokenizer();
 	if (nodecount != 1)
 		printf("WARNING: %d nodes on the stack\n", nodecount);
-	return result;
+	return nodestack[--nodecount];
 }
 
 void push_node(enum nodetype type, long start, long end, int nchild)
