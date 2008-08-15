@@ -79,7 +79,7 @@ struct node *parse(char *filename)
 	return nodestack[--nodecount];
 }
 
-void push_node(enum nodetype type, long start, long end, int nchild)
+struct node *push_node(enum nodetype type, long start, long end, int nchild)
 {
 	struct node *node = malloc(sizeof(struct node));
 	memset(node, 0, sizeof(struct node));
@@ -94,6 +94,16 @@ void push_node(enum nodetype type, long start, long end, int nchild)
 			node->children[i] = nodestack[--nodecount];
 	}
 	nodestack[nodecount++] = node;
+	return node;
+}
+
+struct node *push_node_name(enum nodetype type, long start, long end, char *name)
+{
+	char *data = malloc(strlen(name) + 1);
+	struct node *node = push_node(type, start, end, 0);
+	strcpy(data, name);
+	node->data = data;
+	return node;
 }
 
 void free_node(struct node *node)
@@ -126,5 +136,5 @@ void node_at(struct node *node, long offset)
 		}
 	}
 	if (cur->type == AST_IDENTIFIER)
-		printf("identifier found!\n");
+		printf("%s\n", cur->data);
 }

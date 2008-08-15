@@ -590,7 +590,7 @@ macro
 
 identifier
 	: IDENTIFIER
-		{ push_node(AST_IDENTIFIER, @$.start, @$.end, 0); }
+		{ push_node_name(AST_IDENTIFIER, @$.start, @$.end, $1); }
 	;
 %%
 
