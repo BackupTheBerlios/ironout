@@ -273,7 +273,7 @@ type_specifier
 	| enum_specifier
 		{ push_node(AST_TYPE, @$.start, @$.end, 1); }
 	| TYPE_NAME
-		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
+		{ push_node_name(AST_TYPENAME, @$.start, @$.end, $1); }
 	;
 
 struct_or_union_specifier
