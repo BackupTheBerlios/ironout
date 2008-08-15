@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 			free_node(parse(argv[2]));
 			return 0;
 		}
-		if (!strcmp(argv[1], "findat") && argc > 3) {
+		if (!strcmp(argv[1], "getname") && argc > 3) {
 			struct node *node = parse(argv[2]);
 			node_at(node, atoi(argv[3]));
 			free_node(node);
