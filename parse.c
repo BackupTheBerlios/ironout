@@ -18,6 +18,8 @@ int parse(char *filename)
 	result = yyparse();
 	fclose(file);
 	reset_tokenizer();
+	if (nodecount != 1)
+		printf("WARNING: %d nodes on the stack\n", nodecount);
 	return result;
 }
 
