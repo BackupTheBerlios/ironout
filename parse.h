@@ -29,8 +29,6 @@ void reset_tokenizer();
 #include "gram.tab.h"
 #include "ast.h"
 
-struct node *parse(char *filename);
 void push_node(enum nodetype type, long start, long end, int nchild);
-void free_node(struct node* node);
 
 #endif
