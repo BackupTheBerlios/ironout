@@ -135,6 +135,6 @@ void node_at(struct node *node, long offset)
 			}
 		}
 	}
-	if (cur->type == AST_IDENTIFIER)
+	if (cur->type == AST_IDENTIFIER || cur->type == AST_TYPENAME)
 		printf("%s\n", cur->data);
 }
