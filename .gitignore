@@ -1,0 +1,7 @@
+clex.[ch]
+cyacc.[ch]
+*.o
+*~
+ironout
+TAGS
+TODO
