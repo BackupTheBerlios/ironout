@@ -36,3 +36,16 @@ void push_node(enum nodetype type, long start, long end, int nchild)
 		node->children[i] = nodestack[--nodecount];
 	nodestack[nodecount++] = node;
 }
+
+void free_node(struct node* node)
+{
+	if (node->children) {
+		int i;
+		for (i = 0; i < node->count; i++)
+			free_node(node->children[i]);
+		free(node->children);
+	}
+	if (node->data)
+		free(node->data);
+	free(node);
+}
