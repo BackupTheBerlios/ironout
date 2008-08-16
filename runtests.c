@@ -81,7 +81,8 @@ static int runtest(char *filename)
 			write_file(input);
 			continue;
 		}
-		input_next(input);
+		printf("unknown command: %s\n", command);
+		return 1;
 	}
 	input_free(input);
 	return 0;
