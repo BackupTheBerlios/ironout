@@ -65,6 +65,10 @@ int runtests(char *dirname)
 	int total = 0;
 	int fails = 0;
 	dir = opendir(dirname);
+	if (!dir) {
+		printf("failed: %s does not exist\n", dirname);
+		return 1;
+	}
 	while ((ent = readdir(dir))) {
 		char *name = ent->d_name;
 		if (startswith(name, "t") && !endswith(name, "~")) {
