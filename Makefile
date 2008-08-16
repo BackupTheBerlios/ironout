@@ -2,7 +2,7 @@ CC = cc
 YACC = bison
 LEX = flex
 
-CFLAGS = -std=c99 -pedantic -Wall -O2
+CFLAGS = -std=c89 -pedantic -Wall -O2
 LDFLAGS = -s
 LFLAGS =
 YFLAGS = -d
