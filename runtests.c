@@ -4,7 +4,6 @@
 #include <string.h>
 #include "strutils.h"
 
-
 #define MAXLINELEN	1024
 #define MAXPATHLEN	1024
 
@@ -67,33 +66,63 @@ static int write_file(struct input *input)
 	return 0;
 }
 
-static int read_file(struct input *input)
+static int match_files(struct input *input, FILE *realfile)
 {
 	char separator[128];
-	char filename[MAXPATHLEN];
-	FILE *realinput;
-	char *line = input_line(input);
-	char buf[MAXLINELEN];
+	char line[MAXLINELEN];
+	char *expected = input_line(input);
 
-	nthtoken(separator, line, " \n", 1);
-	nthtoken(filename, line, " \n", 3);
-
-	if (!(realinput = fopen(filename, "r")))
-		return 1;
+	nthtoken(separator, expected, " \n", 1);
 	input_next(input);
-	while ((line = input_line(input))) {
-		if (startswith(line, separator))
+	while ((expected = input_line(input))) {
+		if (startswith(expected, separator))
 			break;
-		if (!fgets(buf, MAXLINELEN, realinput))
+		if (!fgets(line, MAXLINELEN, realfile))
 			return 1;
-		if (strcmp(line, buf))
+		if (strcmp(expected, line))
 			return 1;
 		input_next(input);
 	}
-	if (fgets(buf, MAXLINELEN, realinput))
+	if (fgets(line, MAXLINELEN, realfile))
 		return 1;
-	fclose(realinput);
 	return 0;
+}
+
+static int read_file(struct input *input)
+{
+	char filename[MAXPATHLEN];
+	FILE *realinput;
+	char *line = input_line(input);
+	int result;
+
+	nthtoken(filename, line, " \n", 3);
+	if (!(realinput = fopen(filename, "r")))
+		return 1;
+	result = match_files(input, realinput);
+	fclose(realinput);
+	return result;
+}
+
+static int exec_ironout(struct input *input)
+{
+	char token[128];
+	char command[MAXPATHLEN];
+	FILE *output;
+	char *line = input_line(input);
+	int result;
+	char *cur = command;
+
+	line = nthtoken(token, line, " \n", 2);
+	cur += sprintf(cur, "./%s", token);
+	while (*line) {
+		line = readtoken(token, line, " \n");
+		cur += sprintf(cur, " %s", token);
+	}
+	if (!(output = popen(command, "r")))
+		return 1;
+	result = match_files(input, output);
+	pclose(output);
+	return result;
 }
 
 static int read_comment(struct input *input)
@@ -102,20 +131,21 @@ static int read_comment(struct input *input)
 	char *line = input_line(input);
 	line = readtoken(separator, line, " \n");
 	input_next(input);
-	while ((line = input_line(input)) && !startswith(line, separator)) {
+	while ((line = input_line(input)) && !startswith(line, separator))
 		input_next(input);
-	}
 	return 0;
 }
 
 static int runtest(char *filename)
 {
 	struct input *input = input_open(filename);
+	char current_line[MAXLINELEN];
 	char command[128];
 	char *line;
 	if (!input)
 		return 1;
 	while ((line = input_line(input))) {
+		strcpy(current_line, line);
 		int result = -1;
 		nthtoken(command, line, " \n", 2);
 		if (!strcmp(command, "comment"))
@@ -124,12 +154,14 @@ static int runtest(char *filename)
 			result = write_file(input);
 		if (!strcmp(command, "read"))
 			result = read_file(input);
+		if (!strcmp(command, "ironout"))
+			result = exec_ironout(input);
 		if (result == -1) {
 			printf("unknown command: %s\n", command);
 			return 1;
 		}
 		if (result != 0) {
-			printf("failed: %s\n", line);
+			printf("failed: %s\n", current_line);
 			return 1;
 		}
 	}
