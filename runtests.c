@@ -53,9 +53,8 @@ static int write_file(struct input *input)
 	char filename[MAXPATHLEN];
 	FILE *output;
 	char *line = input_line(input);
-	line = readtoken(separator, line, " ");
-	line = readtoken(filename, line, " ");
-	line = readtoken(filename, line, " \n");
+	nthtoken(separator, line, " \n", 1);
+	nthtoken(filename, line, " \n", 3);
 	output = fopen(filename, "w");
 	input_next(input);
 	while ((line = input_line(input))) {
@@ -76,9 +75,8 @@ static int read_file(struct input *input)
 	char *line = input_line(input);
 	char buf[MAXLINELEN];
 
-	line = readtoken(separator, line, " ");
-	line = readtoken(filename, line, " ");
-	line = readtoken(filename, line, " \n");
+	nthtoken(separator, line, " \n", 1);
+	nthtoken(filename, line, " \n", 3);
 
 	if (!(realinput = fopen(filename, "r")))
 		return 1;
@@ -102,7 +100,7 @@ static int read_comment(struct input *input)
 {
 	char separator[128];
 	char *line = input_line(input);
-	line = readtoken(separator, line, " ");
+	line = readtoken(separator, line, " \n");
 	input_next(input);
 	while ((line = input_line(input))) {
 		if (startswith(line, separator))
@@ -121,8 +119,7 @@ static int runtest(char *filename)
 		return 1;
 	while ((line = input_line(input))) {
 		int result = -1;
-		line = readtoken(command, line, " \n");
-		line = readtoken(command, line, " \n");
+		nthtoken(command, line, " \n", 2);
 		if (!strcmp(command, "comment"))
 			result = read_comment(input);
 		if (!strcmp(command, "write"))
