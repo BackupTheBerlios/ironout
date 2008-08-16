@@ -122,7 +122,7 @@ void free_node(struct node *node)
 	free(node);
 }
 
-char *name_at(struct node *node, long offset)
+struct node *node_at(struct node *node, long offset)
 {
 	struct node *cur = node;
 	int i;
@@ -138,9 +138,7 @@ char *name_at(struct node *node, long offset)
 			}
 		}
 	}
-	if (cur->type == AST_IDENTIFIER || cur->type == AST_TYPENAME)
-		return cur->data;
-	return NULL;
+	return cur;
 }
 
 void walk_nodes(struct node *node,
