@@ -3,10 +3,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include "strutils.h"
 
 #define MAXLINELEN	1024
 #define MAXPATHLEN	1024
+#define TEMPDIR		"ironproj"
+#define IRONOUT		"../ironout"
 
 
 struct input {
@@ -114,7 +118,8 @@ static int exec_ironout(struct input *input)
 	char *cur = command;
 
 	line = nthtoken(token, line, " \n", 2);
-	cur += sprintf(cur, "./%s", token);
+	strcpy(cur, IRONOUT);
+	cur += strlen(cur);
 	while (*line) {
 		line = readtoken(token, line, " \n");
 		cur += sprintf(cur, " %s", token);
@@ -170,6 +175,29 @@ static int runtest(char *filename)
 	return 0;
 }
 
+static void mktempdir(char *path)
+{
+	mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR);
+}
+
+static void rmtempdir(char *path)
+{
+	struct dirent *ent;
+	DIR *dir = opendir(path);
+	while ((ent = readdir(dir))) {
+		char child[MAXPATHLEN];
+		if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
+			continue;
+		sprintf(child, "%s/%s", path, ent->d_name);
+		if (ent->d_type == DT_DIR)
+			rmtempdir(child);
+		else
+			unlink(child);
+	}
+	closedir(dir);
+	rmdir(path);
+}
+
 int runtests(char *dirname)
 {
 	struct dirent *ent;
@@ -200,11 +228,34 @@ int runtests(char *dirname)
 	return fails;
 }
 
+static void abspath(char *path, char *rel)
+{
+	if (rel[0] != '/') {
+		getcwd(path, MAXPATHLEN);
+		strcat(path, "/");
+		strcat(path, rel);
+	} else {
+		strcpy(path, rel);
+	}
+}
+
 int main(int argc, char **argv)
 {
+	int result;
+	char testdir[MAXPATHLEN];
+	char origin[MAXPATHLEN];
 	if (argc < 2) {
 		printf("Usage: %s testdir\n", argv[0]);
 		return 1;
 	}
-	return runtests(argv[1]);
+	mktempdir(TEMPDIR);
+	getcwd(origin, MAXPATHLEN);
+	abspath(testdir, argv[1]);
+	chdir(TEMPDIR);
+
+	result = runtests(testdir);
+
+	chdir(origin);
+	rmtempdir(TEMPDIR);
+	return result;
 }
