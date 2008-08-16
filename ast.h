@@ -61,7 +61,7 @@ enum nodetype {
 	AST_TYPENAME,
 	AST_UNARY,
 	AST_UNARYOP,
-	AST_WHILE,
+	AST_WHILE
 };
 
 struct node {
