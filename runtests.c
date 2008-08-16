@@ -148,7 +148,7 @@ static int runtest(char *filename)
 		strcpy(current_line, line);
 		int result = -1;
 		nthtoken(command, line, " \n", 2);
-		if (!strcmp(command, "comment"))
+		if (!strcmp(command, "comment") || !strcmp(command, "#"))
 			result = read_comment(input);
 		if (!strcmp(command, "write"))
 			result = write_file(input);
