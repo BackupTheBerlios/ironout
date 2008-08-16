@@ -68,6 +68,20 @@ static int write_file(struct input *input)
 	return 0;
 }
 
+static int read_comment(struct input *input)
+{
+	char separator[128];
+	char *line = input_line(input);
+	line = readtoken(separator, line, " ");
+	input_next(input);
+	while ((line = input_line(input))) {
+		if (startswith(line, separator))
+			break;
+		input_next(input);
+	}
+	return 0;
+}
+
 static int runtest(char *filename)
 {
 	struct input *input = input_open(filename);
@@ -76,17 +90,21 @@ static int runtest(char *filename)
 	if (!input)
 		return 1;
 	while ((line = input_line(input))) {
+		int result = -1;
 		line = readtoken(command, line, " \n");
 		line = readtoken(command, line, " \n");
-		if (!strcmp(command, "write")) {
-			if (write_file(input)) {
-				printf("failed: %s\n", line);
-				return 1;
-			}
-			continue;
+		if (!strcmp(command, "comment"))
+			result = read_comment(input);
+		if (!strcmp(command, "write"))
+			result = write_file(input);
+		if (result == -1) {
+			printf("unknown command: %s\n", command);
+			return 1;
 		}
-		printf("unknown command: %s\n", command);
-		return 1;
+		if (result != 0) {
+			printf("failed: %s\n", line);
+			return 1;
+		}
 	}
 	input_free(input);
 	return 0;
