@@ -27,7 +27,6 @@ static int list_size(struct node *node)
 {
 	int result = 0;
 	struct node *cur = node;
-	int found = 0;
 	if (!list_nodetype(node->type))
 		return 0;
 	while (cur->type == node->type) {
