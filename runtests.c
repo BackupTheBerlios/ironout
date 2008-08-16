@@ -1,10 +1,12 @@
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <dirent.h>
+#include <string.h>
 #include "strutils.h"
 
 
 #define MAXLINELEN	1024
+#define MAXPATHLEN	1024
 
 
 struct input {
@@ -45,13 +47,40 @@ static void input_free(struct input *input)
 	free(input);
 }
 
+static void write_file(struct input *input)
+{
+	char separator[128];
+	char filename[MAXPATHLEN];
+	FILE *output;
+	char *line = input_line(input);
+	line = readtoken(separator, line, " ");
+	line = readtoken(filename, line, " ");
+	line = readtoken(filename, line, " \n");
+	output = fopen(filename, "w");
+	input_next(input);
+	while ((line = input_line(input))) {
+		if (startswith(line, separator))
+			break;
+		fputs(line, output);
+		input_next(input);
+	}
+	fclose(output);
+}
+
 static int runtest(char *filename)
 {
 	struct input *input = input_open(filename);
+	char command[128];
 	char *line;
 	if (!input)
 		return 1;
 	while ((line = input_line(input))) {
+		line = readtoken(command, line, " \n");
+		line = readtoken(command, line, " \n");
+		if (!strcmp(command, "write")) {
+			write_file(input);
+			continue;
+		}
 		input_next(input);
 	}
 	input_free(input);
@@ -72,7 +101,7 @@ int runtests(char *dirname)
 	while ((ent = readdir(dir))) {
 		char *name = ent->d_name;
 		if (startswith(name, "t") && !endswith(name, "~")) {
-			char path[1024];
+			char path[MAXPATHLEN];
 			sprintf(path, "%s/%s", dirname, name);
 			total++;
 			if (runtest(path)) {
