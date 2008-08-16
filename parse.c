@@ -46,13 +46,14 @@ static void linear_lists(struct node *node)
 	if (n) {
 		struct node *cur = node;
 		struct node **newchildren = malloc(n * sizeof(struct node *));
+		int start = 0, end = n;
 		for (i = 0; i < n; i++) {
 			if (cur->children[0]->type != node->type) {
-				newchildren[i] = cur->children[0];
+				newchildren[start++] = cur->children[0];
 				if (cur->count > 1)
 					cur = cur->children[1];
 			} else {
-				newchildren[i] = cur->children[1];
+				newchildren[--end] = cur->children[1];
 				cur = cur->children[0];
 			}
 		}
