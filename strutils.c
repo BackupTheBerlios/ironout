@@ -24,6 +24,14 @@ char *readword(char *to, char *from)
 	return from;
 }
 
+char *nthtoken(char *to, char *from, char* delims, int n)
+{
+	int i = 0;
+	for (i = 0; i < n; i++)
+		from = readtoken(to, from, delims);
+	return from;
+}
+
 int startswith(char *heystack, char *needle)
 {
 	return strstr(heystack, needle) == heystack;
