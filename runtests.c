@@ -166,7 +166,7 @@ static int runtest(char *filename, char *ironout)
 			return 1;
 		}
 		if (result > 0) {
-			printf("failed: %s\n", current_line);
+			printf("failed%s", current_line);
 			return 1;
 		}
 	}
