@@ -14,18 +14,21 @@ static enum nodetype listnodes[] = {
 	AST_INITIALIZERLIST, AST_STRUCTLIST, AST_STMTLIST,
 	AST_SPECLIST, AST_EXPRLIST, AST_DECLLIST, AST_ARGLIST};
 
+static int list_nodetype(enum nodetype nodetype)
+{
+	int i;
+	for (i = 0; i < LENGTH(listnodes); i++)
+		if (nodetype == listnodes[i])
+			return 1;
+	return 0;
+}
+
 static int list_size(struct node *node)
 {
 	int result = 0;
 	struct node *cur = node;
 	int found = 0;
-	int i;
-	for (i = 0; i < LENGTH(listnodes); i++)
-		if (node->type == listnodes[i]) {
-			found = 1;
-			break;
-		}
-	if (!found)
+	if (!list_nodetype(node->type))
 		return 0;
 	while (cur->type == node->type) {
 		result++;
