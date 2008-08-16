@@ -141,27 +141,27 @@ static int runtest(char *filename)
 {
 	struct input *input = input_open(filename);
 	char current_line[MAXLINELEN];
-	char command[128];
+	char cmd[128];
 	char *line;
 	if (!input)
 		return 1;
 	while ((line = input_line(input))) {
 		int result = -1;
 		strcpy(current_line, line);
-		nthtoken(command, line, " \n", 2);
-		if (!strcmp(command, "comment") || !strcmp(command, "#"))
+		nthtoken(cmd, line, " \n", 2);
+		if (!strcmp(cmd, "comment") || !strcmp(cmd, "#") || !*cmd)
 			result = read_comment(input);
-		if (!strcmp(command, "write") || !strcmp(command, ">"))
+		if (!strcmp(cmd, "write") || !strcmp(cmd, ">"))
 			result = write_file(input);
-		if (!strcmp(command, "read") || !strcmp(command, "<"))
+		if (!strcmp(cmd, "read") || !strcmp(cmd, "<"))
 			result = read_file(input);
-		if (!strcmp(command, "ironout"))
+		if (!strcmp(cmd, "ironout"))
 			result = exec_ironout(input);
 		if (result == -1) {
-			printf("unknown command: %s\n", command);
+			printf("unknown cmd: %s\n", cmd);
 			return 1;
 		}
-		if (result != 0) {
+		if (result > 0) {
 			printf("failed: %s\n", current_line);
 			return 1;
 		}
