@@ -47,7 +47,7 @@ static void input_free(struct input *input)
 	free(input);
 }
 
-static void write_file(struct input *input)
+static int write_file(struct input *input)
 {
 	char separator[128];
 	char filename[MAXPATHLEN];
@@ -65,6 +65,7 @@ static void write_file(struct input *input)
 		input_next(input);
 	}
 	fclose(output);
+	return 0;
 }
 
 static int runtest(char *filename)
@@ -78,7 +79,10 @@ static int runtest(char *filename)
 		line = readtoken(command, line, " \n");
 		line = readtoken(command, line, " \n");
 		if (!strcmp(command, "write")) {
-			write_file(input);
+			if (write_file(input)) {
+				printf("failed: %s\n", line);
+				return 1;
+			}
 			continue;
 		}
 		printf("unknown command: %s\n", command);
@@ -106,7 +110,6 @@ int runtests(char *dirname)
 			sprintf(path, "%s/%s", dirname, name);
 			total++;
 			if (runtest(path)) {
-				printf("* %s failed\n", path);
 				fails++;
 			}
 		}
