@@ -68,6 +68,36 @@ static int write_file(struct input *input)
 	return 0;
 }
 
+static int read_file(struct input *input)
+{
+	char separator[128];
+	char filename[MAXPATHLEN];
+	FILE *realinput;
+	char *line = input_line(input);
+	char buf[MAXLINELEN];
+
+	line = readtoken(separator, line, " ");
+	line = readtoken(filename, line, " ");
+	line = readtoken(filename, line, " \n");
+
+	if (!(realinput = fopen(filename, "r")))
+		return 1;
+	input_next(input);
+	while ((line = input_line(input))) {
+		if (startswith(line, separator))
+			break;
+		if (!fgets(buf, MAXLINELEN, realinput))
+			return 1;
+		if (strcmp(line, buf))
+			return 1;
+		input_next(input);
+	}
+	if (fgets(buf, MAXLINELEN, realinput))
+		return 1;
+	fclose(realinput);
+	return 0;
+}
+
 static int read_comment(struct input *input)
 {
 	char separator[128];
@@ -97,6 +127,8 @@ static int runtest(char *filename)
 			result = read_comment(input);
 		if (!strcmp(command, "write"))
 			result = write_file(input);
+		if (!strcmp(command, "read"))
+			result = read_file(input);
 		if (result == -1) {
 			printf("unknown command: %s\n", command);
 			return 1;
