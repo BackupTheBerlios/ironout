@@ -9,7 +9,7 @@ YFLAGS = -d
 
 OBJS = cyacc.o clex.o parse.o ironout.o
 
-all: ironout
+all: ironout runtests
 
 parse.o: parse.h ast.h utils.h
 cyacc.c: cyacc.y
@@ -19,6 +19,9 @@ clex.c: clex.l
 .c.o:
 	$(CC) -c $(CFLAGS) $<
 ironout: $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^
+
+runtests: runtests.o strutils.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
 clean:
