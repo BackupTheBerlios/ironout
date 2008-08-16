@@ -74,6 +74,6 @@ struct node {
 
 struct node *parse(char *filename);
 void free_node(struct node* node);
-void name_at(struct node* node, long offset);
+char *name_at(struct node* node, long offset);
 
 #endif

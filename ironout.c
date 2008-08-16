@@ -13,7 +13,9 @@ static int parse_cmd(char *filename)
 static int getname_cmd(char *filename, long offset)
 {
 	struct node *node = parse(filename);
-	name_at(node, offset);
+	char *name = name_at(node, offset);
+	if (name)
+		puts(name);
 	free_node(node);
 	return 0;
 }
