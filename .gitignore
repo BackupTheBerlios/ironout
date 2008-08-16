@@ -3,5 +3,6 @@ cyacc.[ch]
 *.o
 *~
 ironout
+runtests
 TAGS
 TODO
