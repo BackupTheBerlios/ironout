@@ -1,4 +1,13 @@
+: # simple getname
+------------------
 : write test.c
 int var;
 : ironout getname test.c 5
+var
+: # ignoring comments
+---------------------
+: > test.c
+/* a comment */
+int var;
+: ironout getname test.c 21
 var
