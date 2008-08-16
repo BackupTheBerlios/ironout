@@ -1,0 +1,24 @@
+=========
+ ironout
+=========
+
+Ironout_ is a C refactoring tool.
+
+.. _ironout: http://ironout.berlios.de
+
+
+Hacking
+=======
+
+Send patches, bug reports and feature requests to `ironout (at)
+googlegroups.com`_.  Also ironout's git repository is located at
+git://git.berlios.de/ironout.
+
+.. _`ironout (at) googlegroups.com`: http://groups.google.com/group/ironout
+
+
+License
+=======
+
+This program is under the terms of GNU GPL.  Have a look at COPYING
+file for more information.
