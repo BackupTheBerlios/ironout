@@ -10,7 +10,6 @@
 #define MAXLINELEN	1024
 #define MAXPATHLEN	1024
 #define TEMPDIR		"ironproj"
-#define IRONOUT		"../ironout"
 
 
 struct input {
@@ -108,7 +107,7 @@ static int read_file(struct input *input)
 	return result;
 }
 
-static int exec_ironout(struct input *input)
+static int exec_ironout(struct input *input, char *ironout)
 {
 	char token[128];
 	char command[MAXPATHLEN];
@@ -118,7 +117,7 @@ static int exec_ironout(struct input *input)
 	char *cur = command;
 
 	line = nthtoken(token, line, " \n", 2);
-	strcpy(cur, IRONOUT);
+	strcpy(cur, ironout);
 	cur += strlen(cur);
 	while (*line) {
 		line = readtoken(token, line, " \n");
@@ -142,7 +141,7 @@ static int read_comment(struct input *input)
 	return 0;
 }
 
-static int runtest(char *filename)
+static int runtest(char *filename, char *ironout)
 {
 	struct input *input = input_open(filename);
 	char current_line[MAXLINELEN];
@@ -161,7 +160,7 @@ static int runtest(char *filename)
 		if (!strcmp(cmd, "read") || !strcmp(cmd, "<"))
 			result = read_file(input);
 		if (!strcmp(cmd, "ironout"))
-			result = exec_ironout(input);
+			result = exec_ironout(input, ironout);
 		if (result == -1) {
 			printf("unknown cmd: %s\n", cmd);
 			return 1;
@@ -198,7 +197,7 @@ static void rmtempdir(char *path)
 	rmdir(path);
 }
 
-int runtests(char *dirname)
+int runtests(char *dirname, char *ironout)
 {
 	struct dirent *ent;
 	DIR *dir;
@@ -215,7 +214,7 @@ int runtests(char *dirname)
 			char path[MAXPATHLEN];
 			sprintf(path, "%s/%s", dirname, name);
 			total++;
-			if (runtest(path)) {
+			if (runtest(path, ironout)) {
 				fails++;
 			}
 		}
@@ -243,6 +242,7 @@ int main(int argc, char **argv)
 {
 	int result;
 	char testdir[MAXPATHLEN];
+	char ironout[MAXPATHLEN];
 	char origin[MAXPATHLEN];
 	if (argc < 2) {
 		printf("Usage: %s testdir\n", argv[0]);
@@ -251,9 +251,10 @@ int main(int argc, char **argv)
 	mktempdir(TEMPDIR);
 	getcwd(origin, MAXPATHLEN);
 	abspath(testdir, argv[1]);
+	abspath(ironout, "ironout");
 	chdir(TEMPDIR);
 
-	result = runtests(testdir);
+	result = runtests(testdir, ironout);
 
 	chdir(origin);
 	rmtempdir(TEMPDIR);
