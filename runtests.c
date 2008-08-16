@@ -151,9 +151,9 @@ static int runtest(char *filename)
 		nthtoken(command, line, " \n", 2);
 		if (!strcmp(command, "comment") || !strcmp(command, "#"))
 			result = read_comment(input);
-		if (!strcmp(command, "write"))
+		if (!strcmp(command, "write") || !strcmp(command, ">"))
 			result = write_file(input);
-		if (!strcmp(command, "read"))
+		if (!strcmp(command, "read") || !strcmp(command, "<"))
 			result = read_file(input);
 		if (!strcmp(command, "ironout"))
 			result = exec_ironout(input);
