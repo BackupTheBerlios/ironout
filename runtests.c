@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -145,8 +146,8 @@ static int runtest(char *filename)
 	if (!input)
 		return 1;
 	while ((line = input_line(input))) {
-		strcpy(current_line, line);
 		int result = -1;
+		strcpy(current_line, line);
 		nthtoken(command, line, " \n", 2);
 		if (!strcmp(command, "comment") || !strcmp(command, "#"))
 			result = read_comment(input);
