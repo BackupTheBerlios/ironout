@@ -1,10 +1,60 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <dirent.h>
 #include "strutils.h"
 
 
-static int runtest()
+#define MAXLINELEN	1024
+
+
+struct input {
+	FILE *input;
+	char buf[MAXLINELEN];
+};
+
+static struct input *input_open(char *filename)
 {
+	FILE *input = fopen(filename, "r");
+	struct input *result;
+	if (!input)
+		return NULL;
+	result = malloc(sizeof(struct input));
+	result->input = input;
+	result->buf[0] = '\0';
+	return result;
+}
+
+static char *input_line(struct input *input)
+{
+	if (*input->buf)
+		return input->buf;
+	if (!fgets(input->buf, MAXLINELEN, input->input))
+		return NULL;
+	return input->buf;
+}
+
+static void input_next(struct input *input)
+{
+	input->buf[0] = '\0';
+}
+
+static void input_free(struct input *input)
+{
+	if (input->input)
+		fclose(input->input);
+	free(input);
+}
+
+static int runtest(char *filename)
+{
+	struct input *input = input_open(filename);
+	char *line;
+	if (!input)
+		return 1;
+	while ((line = input_line(input))) {
+		input_next(input);
+	}
+	input_free(input);
 	return 0;
 }
 
