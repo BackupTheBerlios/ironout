@@ -122,7 +122,7 @@ void free_node(struct node *node)
 	free(node);
 }
 
-void node_at(struct node *node, long offset)
+void name_at(struct node *node, long offset)
 {
 	struct node *cur = node;
 	int i;
