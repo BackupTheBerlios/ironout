@@ -102,9 +102,7 @@ static int read_comment(struct input *input)
 	char *line = input_line(input);
 	line = readtoken(separator, line, " \n");
 	input_next(input);
-	while ((line = input_line(input))) {
-		if (startswith(line, separator))
-			break;
+	while ((line = input_line(input)) && !startswith(line, separator)) {
 		input_next(input);
 	}
 	return 0;
