@@ -7,9 +7,9 @@ LDFLAGS = -s
 LFLAGS =
 YFLAGS = -d
 
-OBJS = cyacc.o clex.o parse.o ironout.o ast.o
+OBJS = cyacc.o clex.o parse.o ironout.o ast.o strutils.o
 
-all: ironout runtests
+all: ironout
 
 parse.o: parse.h ast.h utils.h
 ast.o: ast.h
@@ -23,10 +23,10 @@ clex.c: clex.l
 ironout: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
-runtests: runtests.o strutils.o
-	$(CC) $(LDFLAGS) -o $@ $^
-
+test: all
+	$(MAKE) -C tests/ all
 clean:
-	rm -f cyacc.[ch] clex.c *.output *.o
+	rm -f cyacc.[ch] clex.c *.o
+	$(MAKE) -C tests/ clean
 ctags:
 	etags *.[hc]
