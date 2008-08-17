@@ -1,0 +1,16 @@
+: # simple find
+---------------
+: write test.c
+int var;
+: ironout find test.c 6
+4 7
+: # multiple occurrences
+------------------------
+: write test.c
+int var;
+int f() {
+	return var;
+}
+: ironout find test.c 6
+4 7
+27 30
