@@ -213,7 +213,7 @@ int runtests(char *dirname, char *ironout)
 	}
 	while ((ent = readdir(dir))) {
 		char *name = ent->d_name;
-		if (startswith(name, "t") && !endswith(name, "~")) {
+		if (startswith(name, "test-") && !endswith(name, "~")) {
 			char path[MAXPATHLEN];
 			sprintf(path, "%s/%s", dirname, name);
 			total++;
