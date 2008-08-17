@@ -93,7 +93,7 @@ struct node *push_node(enum nodetype type, long start, long end, int nchild)
 		int i;
 		node->count = nchild;
 		node->children = malloc(nchild * sizeof(struct node *));
-		for (i = 0; i < nchild; i++)
+		for (i = nchild - 1; i >= 0; i--)
 			node->children[i] = nodestack[--nodecount];
 	}
 	nodestack[nodecount++] = node;
