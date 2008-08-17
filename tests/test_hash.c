@@ -70,9 +70,26 @@ static void test_inthash()
 	hash_release(hash);
 }
 
+static void test_many()
+{
+	struct hash *hash = hash_init(_inthash, _inthash, _intcmp);
+	int data[1500];
+	int i;
+
+	for (i = 0; i < 1500; i++) {
+		data[i] = i;
+		hash_put(hash, &data[i]);
+	}
+	for (i = 0; i < 1500; i++)
+		equal(&data[i], hash_get(hash, &i), "30");
+
+	hash_release(hash);
+}
+
 int main()
 {
 	test_inthash();
 	test_strhash();
+	test_many();
 	return 0;
 }
