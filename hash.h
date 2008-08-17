@@ -11,11 +11,14 @@ struct hash {
 	long (*datahash) (void *data);
 	long (*keyhash) (void *data);
 	int (*datacmp) (void *data, void *key);
+	int size;
+	int collisions;
 };
 
 struct hash *hash_init(long (*datahash) (void *data),
 		       long (*keyhash) (void *data),
-		       int (*datacmp) (void *data, void *key));
+		       int (*datacmp) (void *data, void *key),
+		       int size);
 void hash_release(struct hash *hash);
 
 void hash_put(struct hash *hash, void *value);

@@ -36,7 +36,7 @@ static int _intcmp(void *data, void *key)
 
 static void test_strhash()
 {
-	struct hash *hash = hash_init(_strhash, _strhash, _strcmp);
+	struct hash *hash = hash_init(_strhash, _strhash, _strcmp, 2);
 	char *a = "a";
 	char *b = "b";
 
@@ -57,7 +57,7 @@ static void test_strhash()
 
 static void test_inthash()
 {
-	struct hash *hash = hash_init(_inthash, _inthash, _intcmp);
+	struct hash *hash = hash_init(_inthash, _inthash, _intcmp, 2);
 	int a = 0, b = 1, zero = 0, one = 1;
 
 	equal(NULL, hash_get(hash, &one), "0");
@@ -72,7 +72,7 @@ static void test_inthash()
 
 static void test_many()
 {
-	struct hash *hash = hash_init(_inthash, _inthash, _intcmp);
+	struct hash *hash = hash_init(_inthash, _inthash, _intcmp, 2);
 	int data[1500];
 	int i;
 
