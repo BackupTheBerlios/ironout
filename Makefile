@@ -7,13 +7,14 @@ LDFLAGS = -s
 LFLAGS =
 YFLAGS = -d
 
-OBJS = cyacc.o clex.o parse.o ironout.o ast.o strutils.o
+OBJS = cyacc.o clex.o parse.o ironout.o ast.o strutils.o hash.o
 
 all: ironout
 
 parse.o: parse.h ast.h utils.h
 ast.o: ast.h
 strutils.o: strutils.h
+hash.o: hash.h
 cyacc.c: cyacc.y
 	$(YACC) $(YFLAGS) -o $@ $<
 clex.c: clex.l
