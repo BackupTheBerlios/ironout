@@ -19,21 +19,6 @@ struct hash *hash_init(long (*datahash) (void *data),
 	return hash;
 }
 
-void hash_release(struct hash *hash)
-{
-	int i;
-	for (i = 0; i < hash->size; i++) {
-		struct entry *cur = hash->table[i];
-		while (cur) {
-			struct entry *old = cur;
-			cur = cur->next;
-			free(old);
-		}
-	}
-	free(hash->table);
-	free(hash);
-}
-
 long str_hash(char *s)
 {
 	long x = *s << 7;
@@ -73,20 +58,43 @@ void *hash_get(struct hash *hash, void *key)
 	return NULL;
 }
 
-static void hash_grow(struct hash *hash, int size)
+static void hash_walk(struct hash *hash, void *data,
+		      void (*callback) (struct entry *, void *data))
 {
-	struct hash *newhash = hash_init(hash->datahash, hash->keyhash,
-					 hash->datacmp, size);
 	int i;
 	for (i = 0; i < hash->size; i++) {
 		struct entry *cur = hash->table[i];
 		while (cur) {
 			struct entry *old = cur;
-			hash_put(newhash, cur->data);
 			cur = cur->next;
-			free(old);
+			callback(old, data);
 		}
 	}
+}
+
+static void free_entry(struct entry *entry, void *data)
+{
+	free(entry);
+}
+
+void hash_release(struct hash *hash)
+{
+	hash_walk(hash, NULL, free_entry);
+	free(hash->table);
+	free(hash);
+}
+
+static void copy_and_free_entry(struct entry *entry, void *newhash)
+{
+	hash_put(newhash, entry->data);
+	free(entry);
+}
+
+static void hash_grow(struct hash *hash, int size)
+{
+	struct hash *newhash = hash_init(hash->datahash, hash->keyhash,
+					 hash->datacmp, size);
+	hash_walk(hash, newhash, copy_and_free_entry);
 	free(hash->table);
 	memcpy(hash, newhash, sizeof(*hash));
 	free(newhash);
