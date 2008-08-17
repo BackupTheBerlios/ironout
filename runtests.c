@@ -166,7 +166,10 @@ static int runtest(char *filename, char *ironout)
 			return 1;
 		}
 		if (result > 0) {
-			printf("failed%s", current_line);
+			char *testname = filename;
+			if (strchr(testname, '/'))
+				testname = strrchr(testname, '/') + 1;
+			printf("%s failed%s", testname, current_line);
 			return 1;
 		}
 	}
