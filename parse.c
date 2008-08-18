@@ -2,12 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ast.h"
+#include "hash.h"
 #include "parse.h"
 #include "utils.h"
 
 
 static struct node *nodestack[1024];
 static int nodecount = 0;
+static struct hash *typedef_hash = NULL;
 
 static enum nodetype listnodes[] = {
 	AST_FILE, AST_BODY, AST_IDLIST, AST_ENUMLIST,
@@ -77,8 +79,11 @@ struct node *parse(char *filename)
 	fclose(file);
 	reset_tokenizer();
 	if (nodecount != 1)
-		printf("WARNING: %d nodes on the stack\n", nodecount);
-	linear_lists(nodestack[0]);
+		printf("ERROR: %d nodes on the stack\n", nodecount);
+	else
+		linear_lists(nodestack[0]);
+	hash_release(typedef_hash);
+	typedef_hash = NULL;
 	return nodestack[--nodecount];
 }
 
@@ -120,4 +125,18 @@ void free_node(struct node *node)
 	if (node->data)
 		free(node->data);
 	free(node);
+}
+
+static int str_cmp(void *data, void *key)
+{
+	return strcmp(data, key);
+}
+
+int is_typename(char *name)
+{
+	if (!typedef_hash) {
+		typedef_hash = hash_init(str_hash, str_hash, str_cmp, 16);
+		hash_put(typedef_hash, "FILE");
+	}
+	return hash_get(typedef_hash, name) != NULL;
 }
