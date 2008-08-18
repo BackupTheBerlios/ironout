@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "hash.h"
+#include "utils.h"
 
 
 struct hash *hash_init(long (*datahash) (void *data),
@@ -8,13 +9,13 @@ struct hash *hash_init(long (*datahash) (void *data),
 		       int (*datacmp) (void *data, void *key),
 		       int size)
 {
-	struct hash *hash = malloc(sizeof(struct hash));
+	struct hash *hash = xmalloc(sizeof(struct hash));
 	hash->datahash = datahash;
 	hash->keyhash = keyhash;
 	hash->datacmp = datacmp;
 	hash->size = size;
 	hash->collisions = 0;
-	hash->table = malloc(size * sizeof(struct entry *));
+	hash->table = xmalloc(size * sizeof(struct entry *));
 	memset(hash->table, 0, size * sizeof(struct entry *));
 	return hash;
 }
@@ -37,7 +38,7 @@ static void hash_grow(struct hash *hash, int size);
 void hash_put(struct hash *hash, void *data)
 {
 	long i = hash_key(hash, hash->datahash(data));
-	struct entry *newdata = malloc(sizeof(struct entry *));
+	struct entry *newdata = xmalloc(sizeof(struct entry *));
 	newdata->data = data;
 	if (hash->table[i])
 		hash->collisions++;

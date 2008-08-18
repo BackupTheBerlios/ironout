@@ -47,7 +47,7 @@ static void linear_lists(struct node *node)
 	int i;
 	if (n) {
 		struct node *cur = node;
-		struct node **newchildren = malloc(n * sizeof(struct node *));
+		struct node **newchildren = xmalloc(n * sizeof(struct node *));
 		int start = 0, end = n;
 		for (i = 0; i < n; i++) {
 			if (cur->children[0]->type != node->type) {
@@ -84,7 +84,7 @@ struct node *parse(char *filename)
 
 struct node *push_node(enum nodetype type, long start, long end, int nchild)
 {
-	struct node *node = malloc(sizeof(struct node));
+	struct node *node = xmalloc(sizeof(struct node));
 	memset(node, 0, sizeof(struct node));
 	node->type = type;
 	node->start = start;
@@ -92,7 +92,7 @@ struct node *push_node(enum nodetype type, long start, long end, int nchild)
 	if (nchild) {
 		int i;
 		node->count = nchild;
-		node->children = malloc(nchild * sizeof(struct node *));
+		node->children = xmalloc(nchild * sizeof(struct node *));
 		for (i = nchild - 1; i >= 0; i--)
 			node->children[i] = nodestack[--nodecount];
 	}
@@ -102,7 +102,7 @@ struct node *push_node(enum nodetype type, long start, long end, int nchild)
 
 struct node *push_node_name(enum nodetype type, long start, long end, char *name)
 {
-	char *data = malloc(strlen(name) + 1);
+	char *data = xmalloc(strlen(name) + 1);
 	struct node *node = push_node(type, start, end, 0);
 	strcpy(data, name);
 	node->data = data;
