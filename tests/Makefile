@@ -6,7 +6,7 @@ all: runtests test_hash
 	$(CC) -c $(CFLAGS) $<
 runtests: runtests.o ../strutils.o
 	$(CC) $(LDFLAGS) -o $@ $^
-test_hash: test_hash.o ../hash.o
+test_hash: test_hash.o ../hash.o ../utils.o
 	$(CC) $(LDFLAGS) -o $@ $^
 clean:
 	rm -f *.o
