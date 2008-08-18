@@ -20,8 +20,9 @@ struct hash *hash_init(long (*datahash) (void *data),
 	return hash;
 }
 
-long str_hash(char *s)
+long str_hash(void *p)
 {
+	char *s = p;
 	long x = *s << 7;
 	while (*s)
 		x = (1000003 * x) ^ *s++;
