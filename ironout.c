@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ast.h"
+#include "block.h"
 
 
 static int parse_cmd(char *filename)
@@ -38,6 +39,18 @@ static int find_cmd(char *filename, long offset)
 	return 0;
 }
 
+static int block_cmd(char *filename, long offset)
+{
+	struct node *node = parse(filename);
+	struct block *block = block_init(node);
+	struct block *cur = block_find(block, offset);
+	if (cur)
+		printf("%ld %ld\n", cur->node->start, cur->node->end);
+	block_free(block);
+	free_node(node);
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	if (argc > 1) {
@@ -47,6 +60,8 @@ int main(int argc, char **argv)
 			return getname_cmd(argv[2], atoi(argv[3]));
 		if (!strcmp(argv[1], "find") && argc > 3)
 			return find_cmd(argv[2], atoi(argv[3]));
+		if (!strcmp(argv[1], "block") && argc > 3)
+			return block_cmd(argv[2], atoi(argv[3]));
 	}
 	printf("Usage: %s COMMAND [ARGS]\n", argv[0]);
 	return 1;
