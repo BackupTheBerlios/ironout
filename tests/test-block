@@ -1,0 +1,8 @@
+: # simple getname
+------------------
+: write test.c
+void f()
+{
+}
+: ironout block test.c 10
+9 12
