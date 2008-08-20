@@ -39,8 +39,8 @@ int find_blocks(struct node *node, void *data)
 
 static void init_children(struct block *block)
 {
-	if (!block->children)
-		node_walk(block->node, find_blocks, block);
+	node_walk(block->node, find_blocks, block);
+	block->walked = 1;
 }
 
 static void block_walk(struct block *block,
@@ -49,7 +49,7 @@ static void block_walk(struct block *block,
 {
 	if (see(block, data)) {
 		struct block_list *cur;
-		if (!block->children)
+		if (!block->walked)
 			init_children(block);
 		cur = block->children;
 		while (cur) {

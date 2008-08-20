@@ -11,6 +11,7 @@ struct block_list {
 struct block {
 	struct node *node;
 	struct block_list *children;
+	unsigned walked : 1;
 };
 
 struct block *block_init(struct node *node);
