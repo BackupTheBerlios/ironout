@@ -1,7 +1,7 @@
 #include "ast.h"
 
 
-struct node *node_at(struct node *node, long offset)
+struct node *node_find(struct node *node, long offset)
 {
 	struct node *cur = node;
 	int i;

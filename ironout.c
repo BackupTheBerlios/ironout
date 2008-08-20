@@ -14,7 +14,7 @@ static int parse_cmd(char *filename)
 static int getname_cmd(char *filename, long offset)
 {
 	struct node *node = parse(filename);
-	struct node *found = node_at(node, offset);
+	struct node *found = node_find(node, offset);
 	if (found->type == AST_IDENTIFIER || found->type == AST_TYPENAME)
 		puts(found->data);
 	node_free(node);
@@ -32,7 +32,7 @@ static int checknode(struct node *node, void *data)
 static int find_cmd(char *filename, long offset)
 {
 	struct node *node = parse(filename);
-	struct node *found = node_at(node, offset);
+	struct node *found = node_find(node, offset);
 	if (found->type == AST_IDENTIFIER || found->type == AST_TYPENAME)
 		node_walk(node, checknode, found->data);
 	node_free(node);

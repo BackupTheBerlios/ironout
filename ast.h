@@ -74,7 +74,7 @@ struct node {
 
 struct node *parse(char *filename);
 void node_free(struct node *node);
-struct node *node_at(struct node *node, long offset);
+struct node *node_find(struct node *node, long offset);
 void node_walk(struct node *, int (*) (struct node *, void *), void *);
 
 #endif
