@@ -20,11 +20,12 @@ struct node *node_at(struct node *node, long offset)
 	return cur;
 }
 
-void walk_nodes(struct node *node,
-		int (*callback) (struct node *, void *), void *data)
+void node_walk(struct node *node,
+	       int (*callback) (struct node *, void *),
+	       void *data)
 {
 	int i;
 	if (callback(node, data))
 		for (i = 0; i < node->count; i++)
-			walk_nodes(node->children[i], callback, data);
+			node_walk(node->children[i], callback, data);
 }

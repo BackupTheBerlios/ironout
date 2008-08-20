@@ -34,7 +34,7 @@ static int find_cmd(char *filename, long offset)
 	struct node *node = parse(filename);
 	struct node *found = node_at(node, offset);
 	if (found->type == AST_IDENTIFIER || found->type == AST_TYPENAME)
-		walk_nodes(node, checknode, found->data);
+		node_walk(node, checknode, found->data);
 	node_free(node);
 	return 0;
 }

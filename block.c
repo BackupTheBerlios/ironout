@@ -40,7 +40,7 @@ int find_blocks(struct node *node, void *data)
 static void init_children(struct block *block)
 {
 	if (!block->children)
-		walk_nodes(block->node, find_blocks, block);
+		node_walk(block->node, find_blocks, block);
 }
 
 static void block_walk(struct block *block,
