@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "block.h"
+#include "utils.h"
 
 
 struct block *block_init(struct node *node)
 {
-	struct block *block = malloc(sizeof(struct block));
+	struct block *block = xmalloc(sizeof(struct block));
 	block->node = node;
 	block->children = NULL;
 	return block;
@@ -27,7 +28,7 @@ int find_blocks(struct node *node, void *data)
 {
 	struct block *block = data;
 	if (node->type == AST_BLOCK && node != block->node) {
-		struct block_list *newchild = malloc(sizeof(struct block_list));
+		struct block_list *newchild = xmalloc(sizeof(struct block_list));
 		newchild->block = block_init(node);
 		newchild->next = block->children;
 		block->children = newchild;
