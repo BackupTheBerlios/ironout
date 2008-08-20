@@ -114,12 +114,12 @@ struct node *push_node_name(enum nodetype type, long start, long end, char *name
 	return node;
 }
 
-void free_node(struct node *node)
+void node_free(struct node *node)
 {
 	if (node->children) {
 		int i;
 		for (i = 0; i < node->count; i++)
-			free_node(node->children[i]);
+			node_free(node->children[i]);
 		free(node->children);
 	}
 	if (node->data)

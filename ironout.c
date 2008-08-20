@@ -7,7 +7,7 @@
 
 static int parse_cmd(char *filename)
 {
-	free_node(parse(filename));
+	node_free(parse(filename));
 	return 0;
 }
 
@@ -17,7 +17,7 @@ static int getname_cmd(char *filename, long offset)
 	struct node *found = node_at(node, offset);
 	if (found->type == AST_IDENTIFIER || found->type == AST_TYPENAME)
 		puts(found->data);
-	free_node(node);
+	node_free(node);
 	return 0;
 }
 
@@ -35,7 +35,7 @@ static int find_cmd(char *filename, long offset)
 	struct node *found = node_at(node, offset);
 	if (found->type == AST_IDENTIFIER || found->type == AST_TYPENAME)
 		walk_nodes(node, checknode, found->data);
-	free_node(node);
+	node_free(node);
 	return 0;
 }
 
@@ -47,7 +47,7 @@ static int block_cmd(char *filename, long offset)
 	if (cur)
 		printf("%ld %ld\n", cur->node->start, cur->node->end);
 	block_free(block);
-	free_node(node);
+	node_free(node);
 	return 0;
 }
 
