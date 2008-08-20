@@ -203,9 +203,9 @@ constant_expr
 
 declaration
 	: declaration_specifiers ';'
-		{ push_node(AST_DECL, @$.start, @$.end, 1); }
+		{ push_node(AST_DECLSTMT, @$.start, @$.end, 1); }
 	| declaration_specifiers init_declarator_list ';'
-		{ push_node(AST_DECL, @$.start, @$.end, 2); }
+		{ push_node(AST_DECLSTMT, @$.start, @$.end, 2); }
 	;
 
 declaration_specifiers
