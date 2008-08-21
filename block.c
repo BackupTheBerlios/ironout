@@ -128,3 +128,10 @@ struct hash *block_names(struct block *block)
 		init_names(block);
 	return block->names;
 }
+
+struct block *block_defining(struct block *block, char *name)
+{
+	while (block && !hash_get(block_names(block), name))
+		block = block->parent;
+	return block;
+}

@@ -20,5 +20,6 @@ struct block *block_init(struct node *node);
 void block_free(struct block *block);
 struct block *block_find(struct block *block, long offset);
 struct hash *block_names(struct block *block);
+struct block *block_defining(struct block *block, char *name);
 
 #endif
