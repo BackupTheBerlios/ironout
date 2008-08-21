@@ -349,19 +349,19 @@ declarator
 
 declarator2
 	: identifier
-		{ push_node(AST_ADECL, @$.start, @$.end, 1); }
+		{ push_node(AST_DECL2, @$.start, @$.end, 1); }
 	| '(' declarator ')'
-		{ push_node(AST_ADECL, @$.start, @$.end, 1); }
+		{ push_node(AST_DECL2, @$.start, @$.end, 1); }
 	| declarator2 '[' ']'
-		{ push_node(AST_ADECL, @$.start, @$.end, 1); }
+		{ push_node(AST_DECL2, @$.start, @$.end, 1); }
 	| declarator2 '[' constant_expr ']'
-		{ push_node(AST_ADECL, @$.start, @$.end, 2); }
+		{ push_node(AST_DECL2, @$.start, @$.end, 2); }
 	| declarator2 '(' ')'
-		{ push_node(AST_ADECL, @$.start, @$.end, 1); }
+		{ push_node(AST_DECL2, @$.start, @$.end, 1); }
 	| declarator2 '(' parameter_type_list ')'
-		{ push_node(AST_ADECL, @$.start, @$.end, 2); }
+		{ push_node(AST_DECL2, @$.start, @$.end, 2); }
 	| declarator2 '(' parameter_identifier_list ')'
-		{ push_node(AST_ADECL, @$.start, @$.end, 2); }
+		{ push_node(AST_DECL2, @$.start, @$.end, 2); }
 	;
 
 pointer
