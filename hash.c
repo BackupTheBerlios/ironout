@@ -60,8 +60,9 @@ void *hash_get(struct hash *hash, void *key)
 	return NULL;
 }
 
-static void hash_walk(struct hash *hash, void *data,
-		      void (*callback) (struct entry *, void *data))
+static void entry_walk(struct hash *hash,
+			    void (*callback) (struct entry *, void *data),
+			    void *data)
 {
 	int i;
 	for (i = 0; i < hash->size; i++) {
@@ -81,7 +82,7 @@ static void free_entry(struct entry *entry, void *data)
 
 void hash_release(struct hash *hash)
 {
-	hash_walk(hash, NULL, free_entry);
+	entry_walk(hash, free_entry, NULL);
 	free(hash->table);
 	free(hash);
 }
@@ -96,7 +97,7 @@ static void hash_grow(struct hash *hash, int size)
 {
 	struct hash *newhash = hash_init(hash->datahash, hash->keyhash,
 					 hash->datacmp, size);
-	hash_walk(hash, newhash, copy_and_free_entry);
+	entry_walk(hash, copy_and_free_entry, newhash);
 	free(hash->table);
 	memcpy(hash, newhash, sizeof(*hash));
 	free(newhash);
