@@ -66,7 +66,7 @@ struct block_search {
 	struct block *result;
 };
 
-int search_offset(struct block *block, void *data)
+static int search_offset(struct block *block, void *data)
 {
 	struct block_search *search = data;
 	long offset = search->offset;
