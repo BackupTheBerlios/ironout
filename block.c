@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "block.h"
+#include "hash.h"
 #include "utils.h"
 
 
@@ -9,6 +10,7 @@ struct block *block_init(struct node *node)
 	struct block *block = xmalloc(sizeof(struct block));
 	block->node = node;
 	block->children = NULL;
+	block->names = NULL;
 	return block;
 }
 
@@ -82,4 +84,45 @@ struct block *block_find(struct block *block, long offset)
 	result.result = NULL;
 	block_walk(block, search_offset, &result);
 	return result.result;
+}
+
+static int _strcmp(void *data, void *key)
+{
+	return strcmp(data, key);
+}
+
+static int decl_node(enum nodetype type)
+{
+	switch (type) {
+	case AST_DECLLIST:
+	case AST_DECLSTMT:
+	case AST_INITLIST:
+	case AST_INIT:
+	case AST_DECL:
+	case AST_DECL2:
+		return 1;
+	default:
+		return 0;
+	}
+}
+
+static int find_names(struct node *node, void *data)
+{
+	struct block *block = data;
+	if (node->type == AST_IDENTIFIER)
+		hash_put(block->names, node->data);
+	return block->node == node || decl_node(node->type);
+}
+
+static void init_names(struct block *block)
+{
+	block->names = hash_init(str_hash, str_hash, _strcmp, 4);
+	node_walk(block->node, find_names, block);
+}
+
+struct hash *block_names(struct block *block)
+{
+	if (!block->names)
+		init_names(block);
+	return block->names;
 }
