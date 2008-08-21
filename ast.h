@@ -3,6 +3,7 @@
 
 enum nodetype {
 	AST_ADECL,
+	AST_ADECL2,
 	AST_ARGDECL,
 	AST_ARGLIST,
 	AST_ASSIGN,

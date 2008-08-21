@@ -427,23 +427,23 @@ abstract_declarator
 
 abstract_declarator2
 	: '(' abstract_declarator ')'
-		{ push_node(AST_ADECL, @$.start, @$.end, 1); }
+		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
 	| '[' ']'
-		{ push_node(AST_ADECL, @$.start, @$.end, 0); }
+		{ push_node(AST_ADECL2, @$.start, @$.end, 0); }
 	| '[' constant_expr ']'
-		{ push_node(AST_ADECL, @$.start, @$.end, 1); }
+		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
 	| abstract_declarator2 '[' ']'
-		{ push_node(AST_ADECL, @$.start, @$.end, 1); }
+		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
 	| abstract_declarator2 '[' constant_expr ']'
-		{ push_node(AST_ADECL, @$.start, @$.end, 2); }
+		{ push_node(AST_ADECL2, @$.start, @$.end, 2); }
 	| '(' ')'
-		{ push_node(AST_ADECL, @$.start, @$.end, 0); }
+		{ push_node(AST_ADECL2, @$.start, @$.end, 0); }
 	| '(' parameter_type_list ')'
-		{ push_node(AST_ADECL, @$.start, @$.end, 1); }
+		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
 	| abstract_declarator2 '(' ')'
-		{ push_node(AST_ADECL, @$.start, @$.end, 1); }
+		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
 	| abstract_declarator2 '(' parameter_type_list ')'
-		{ push_node(AST_ADECL, @$.start, @$.end, 2); }
+		{ push_node(AST_ADECL2, @$.start, @$.end, 2); }
 	;
 
 initializer
