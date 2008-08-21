@@ -11,6 +11,7 @@ struct block *block_init(struct node *node)
 	block->node = node;
 	block->children = NULL;
 	block->names = NULL;
+	block->parent = NULL;
 	return block;
 }
 
@@ -32,6 +33,7 @@ int find_blocks(struct node *node, void *data)
 	if (node->type == AST_BLOCK && node != block->node) {
 		struct block_list *newchild = xmalloc(sizeof(struct block_list));
 		newchild->block = block_init(node);
+		newchild->block->parent = block;
 		newchild->next = block->children;
 		block->children = newchild;
 		return 0;

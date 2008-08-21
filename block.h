@@ -12,6 +12,7 @@ struct block {
 	struct node *node;
 	struct block_list *children;
 	struct hash *names;
+	struct block *parent;
 	unsigned walked : 1;
 };
 
