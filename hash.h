@@ -23,6 +23,9 @@ void hash_release(struct hash *hash);
 
 void hash_put(struct hash *hash, void *value);
 void *hash_get(struct hash *hash, void *key);
+void hash_walk(struct hash *hash,
+	       void (*walk)(void *data, void *arg),
+	       void *arg);
 
 long str_hash(void *s);
 

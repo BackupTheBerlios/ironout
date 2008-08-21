@@ -102,3 +102,24 @@ static void hash_grow(struct hash *hash, int size)
 	memcpy(hash, newhash, sizeof(*hash));
 	free(newhash);
 }
+
+struct walk_data {
+	void (*walk)(void *data, void *arg)	;
+	void *arg;
+};
+
+static void call_entry(struct entry *entry, void *data)
+{
+	struct walk_data *walk_data = data;
+	walk_data->walk(entry->data, walk_data->arg);
+}
+
+void hash_walk(struct hash *hash,
+		void (*walk)(void *data, void *arg),
+		void *arg)
+{
+	struct walk_data walk_data;
+	walk_data.arg = arg;
+	walk_data.walk = walk;
+	entry_walk(hash, call_entry, &walk_data);
+}
