@@ -14,3 +14,17 @@ int f() {
 : ironout find test.c 6
 4 7
 27 30
+: # finding in function scopes
+------------------------------
+: write test.c
+int f() {
+	int var = 1;
+	return var;
+}
+int g() {
+	int var = 1;
+	return var;
+}
+: ironout find test.c 16
+15 18
+32 35
