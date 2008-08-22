@@ -33,10 +33,10 @@ int g() {
 : write test.c
 int f() {
 	enum values {
-		value1,
-		value2 = 5
-	} val1 = value1;
-	enum values val2 = value2;
+		VALUE1,
+		VALUE2 = 5
+	} val1 = VALUE1;
+	enum values val2 = VALUE2;
 }
 int g() {
 	int value1, value2, values, val1;
@@ -47,3 +47,22 @@ int g() {
 : ironout find test.c 60
 27 33
 58 64
+: # not considering declared enum
+---------------------------------
+: write test.c
+enum values {
+	VALUE1,
+	VALUE2 = 5
+};
+int f() {
+	enum values;
+	enum values val2 = VALUE2;
+}
+int g() {
+	enum values val1 = VALUE1;
+}
+: ironout find test.c 56
+5 11
+54 60
+68 74
+108 114
