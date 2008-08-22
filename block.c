@@ -93,16 +93,21 @@ static int _strcmp(void *data, void *key)
 	return strcmp(data, key);
 }
 
-static int decl_node(enum nodetype type)
+static int decl_node(struct node *node)
 {
-	switch (type) {
+	switch (node->type) {
 	case AST_DECLLIST:
 	case AST_DECLSTMT:
 	case AST_INITLIST:
 	case AST_INIT:
 	case AST_DECL:
 	case AST_DECL2:
+	case AST_DECLSPEC:
+	case AST_TYPE:
+	case AST_ENUMVAL:
 		return 1;
+	case AST_ENUM:
+		return node->children[node->count - 1]->type == AST_ENUMLIST;
 	default:
 		return 0;
 	}
@@ -113,7 +118,7 @@ static int find_names(struct node *node, void *data)
 	struct block *block = data;
 	if (node->type == AST_IDENTIFIER)
 		hash_put(block->names, node->data);
-	return block->node == node || decl_node(node->type);
+	return block->node == node || decl_node(node);
 }
 
 static void init_names(struct block *block)
