@@ -109,12 +109,27 @@ static int decl_node(struct node *node)
 	case AST_DECL2:
 	case AST_DECLSPEC:
 	case AST_TYPE:
-	case AST_ENUMVAL:
 		return 1;
-	case AST_ENUM:
-		return node->children[node->count - 1]->type == AST_ENUMLIST;
 	default:
 		return 0;
+	}
+}
+
+static void handle_enum(struct block *block, struct node *node)
+{
+	int i;
+	/* ENUM -> ENUMLIST */
+	struct node *list = node->children[node->count - 1];
+	if (list->type != AST_ENUMLIST)
+		return;
+	if (node->children[0]->type == AST_IDENTIFIER)
+		hash_put(block_names(block),
+			 name_init(node->children[0]->data, 0));
+	for (i = 0; i < list->count; i++) {
+		/* ENUMLIST -> ENUMVAL -> IDENTIFIER */
+		struct node *child = list->children[i]->children[0];
+		hash_put(block_names(block),
+			 name_init(child->data, 0));
 	}
 }
 
@@ -122,10 +137,12 @@ static int find_names(struct node *node, void *data)
 {
 	struct block *block = data;
 	if (node->type == AST_IDENTIFIER)
-		hash_put(block->names, name_init(node->data, 0));
+		hash_put(block_names(block), name_init(node->data, 0));
+	if (node->type == AST_ENUM)
+		handle_enum(block, node);
 	if (node->type == AST_STRUCT && node->count >= 3)
 		if (node->children[1]->type == AST_IDENTIFIER)
-			hash_put(block->names,
+			hash_put(block_names(block),
 				 name_init(node->children[1]->data, 0));
 	return block->node == node || decl_node(node);
 }
