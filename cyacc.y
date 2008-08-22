@@ -278,16 +278,18 @@ type_specifier
 
 struct_or_union_specifier
 	: struct_or_union identifier '{' struct_declaration_list '}'
-		{ push_node(AST_STRUCT, @$.start, @$.end, 2); }
+		{ push_node(AST_STRUCT, @$.start, @$.end, 3); }
 	| struct_or_union '{' struct_declaration_list '}'
-		{ push_node(AST_STRUCT, @$.start, @$.end, 1); }
+		{ push_node(AST_STRUCT, @$.start, @$.end, 2); }
 	| struct_or_union identifier
-		{ push_node(AST_STRUCT, @$.start, @$.end, 1); }
+		{ push_node(AST_STRUCT, @$.start, @$.end, 2); }
 	;
 
 struct_or_union
 	: STRUCT
+		{ push_node(AST_STRUCTKW, @$.start, @$.end, 0); }
 	| UNION
+		{ push_node(AST_UNIONKW, @$.start, @$.end, 0); }
 	;
 
 struct_declaration_list
