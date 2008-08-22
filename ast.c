@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include "ast.h"
 
 
@@ -35,4 +36,19 @@ struct node *node_find(struct node *node, long offset)
 	search.result = NULL;
 	node_walk(node, search_node, &search);
 	return search.result;
+}
+
+int node_cmp(struct node *n1, struct node *n2)
+{
+	int i;
+	if (n1->type != n2->type || n1->count != n2->count)
+		return 1;
+	/* node->data should be compared based on node->type */
+	if (n1->type == AST_IDENTIFIER || n1->type == AST_TYPENAME)
+		if (strcmp(n1->data, n2->data))
+			return 1;
+	for (i = 0; i < n1->count; i++)
+		if (node_cmp(n1->children[i], n2->children[i]))
+			return 1;
+	return 0;
 }
