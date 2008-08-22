@@ -16,8 +16,8 @@
 #define NAME_EXTERN	0x2000
 
 struct name {
-  	char *name;
-  	int flags;
+	char *name;
+	int flags;
 };
 
 struct name *name_init(char *name, int flags);
