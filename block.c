@@ -118,6 +118,9 @@ static int find_names(struct node *node, void *data)
 	struct block *block = data;
 	if (node->type == AST_IDENTIFIER)
 		hash_put(block->names, node->data);
+	if (node->type == AST_STRUCT && node->count >= 3)
+		if (node->children[1]->type == AST_IDENTIFIER)
+			hash_put(block->names, node->children[1]->data);
 	return block->node == node || decl_node(node);
 }
 

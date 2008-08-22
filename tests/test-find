@@ -66,3 +66,21 @@ int g() {
 54 60
 68 74
 108 114
+: # test struct types
+---------------------
+: write test.c
+int f() {
+	struct myobj {
+		int field1;
+		int field2;
+	} obj1;
+	struct myobj obj2;
+}
+int g() {
+	int myobj, obj1, obj2;
+}
+: ironout find test.c 20
+18 23
+71 76
+: ironout find test.c 58
+57 61
