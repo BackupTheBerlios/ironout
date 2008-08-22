@@ -2,6 +2,7 @@
 #include <string.h>
 #include "block.h"
 #include "hash.h"
+#include "name.h"
 #include "utils.h"
 
 
@@ -15,6 +16,11 @@ struct block *block_init(struct node *node)
 	return block;
 }
 
+static void free_hashed(void *name, void *data)
+{
+	free(name);
+}
+
 void block_free(struct block *block)
 {
 	struct block_list *cur = block->children;
@@ -23,6 +29,10 @@ void block_free(struct block *block)
 		block_free(cur->block);
 		free(cur);
 		cur = next;
+	}
+	if (block->names) {
+		hash_walk(block->names, free_hashed, NULL);
+		hash_release(block->names);
 	}
 	free(block);
 }
@@ -88,11 +98,6 @@ struct block *block_find(struct block *block, long offset)
 	return result.result;
 }
 
-static int _strcmp(void *data, void *key)
-{
-	return strcmp(data, key);
-}
-
 static int decl_node(struct node *node)
 {
 	switch (node->type) {
@@ -117,16 +122,28 @@ static int find_names(struct node *node, void *data)
 {
 	struct block *block = data;
 	if (node->type == AST_IDENTIFIER)
-		hash_put(block->names, node->data);
+		hash_put(block->names, name_init(node->data, 0));
 	if (node->type == AST_STRUCT && node->count >= 3)
 		if (node->children[1]->type == AST_IDENTIFIER)
-			hash_put(block->names, node->children[1]->data);
+			hash_put(block->names,
+				 name_init(node->children[1]->data, 0));
 	return block->node == node || decl_node(node);
+}
+
+long name_hash(void *name)
+{
+	return str_hash(((struct name *) name)->name);
+}
+
+int name_cmp(void *data, void *key)
+{
+	struct name *name = data;
+	return strcmp(name->name, key);
 }
 
 static void init_names(struct block *block)
 {
-	block->names = hash_init(str_hash, str_hash, _strcmp, 4);
+	block->names = hash_init(name_hash, str_hash, name_cmp, 4);
 	node_walk(block->node, find_names, block);
 }
 
