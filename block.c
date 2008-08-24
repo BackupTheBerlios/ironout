@@ -154,13 +154,16 @@ long name_hash(void *name)
 
 int name_cmp(void *data, void *key)
 {
-	struct name *name = data;
-	return strcmp(name->name, key);
+	struct name *n1 = data;
+	struct name *n2 = key;
+	if (!strcmp(n1->name, n2->name))
+		return (n1->flags ^ n2->flags) & NAME_MOD_MASK;
+	return 1;
 }
 
 static void init_names(struct block *block)
 {
-	block->names = hash_init(name_hash, str_hash, name_cmp, 4);
+	block->names = hash_init(name_hash, name_hash, name_cmp, 4);
 	node_walk(block->node, find_names, block);
 }
 
@@ -171,9 +174,35 @@ struct hash *block_names(struct block *block)
 	return block->names;
 }
 
-struct block *block_defining(struct block *block, char *name)
+struct name *name_on(struct node *node)
 {
+	int flags = 0;
+	if (node->type != AST_IDENTIFIER && node->type != AST_TYPENAME)
+		return NULL;
+	return name_init(node->data, flags);
+}
+
+struct block *block_defining(struct block *block, struct node *node)
+{
+	struct name *name = name_on(node);
 	while (block && !hash_get(block_names(block), name))
 		block = block->parent;
+	name_free(name);
 	return block;
+}
+
+struct name *block_lookup(struct block *block, struct node *node)
+{
+	struct name *name = name_on(node);
+	struct name *result = NULL;
+	while (block) {
+		struct name *cur = hash_get(block_names(block), name);
+		if (cur) {
+			result = cur;
+			break;
+		}
+		block = block->parent;
+	}
+	name_free(name);
+	return result;
 }
