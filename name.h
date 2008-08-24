@@ -15,6 +15,8 @@
 #define NAME_STATIC	0x1000
 #define NAME_EXTERN	0x2000
 
+#define NAME_MOD_MASK	0x0F00
+
 struct name {
 	char *name;
 	int flags;
