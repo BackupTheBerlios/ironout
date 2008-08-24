@@ -15,6 +15,7 @@
 struct input {
 	FILE *input;
 	char buf[MAXLINELEN];
+	int lineno;
 };
 
 static struct input *input_open(char *filename)
@@ -26,6 +27,7 @@ static struct input *input_open(char *filename)
 	result = malloc(sizeof(struct input));
 	result->input = input;
 	result->buf[0] = '\0';
+	result->lineno = 0;
 	return result;
 }
 
@@ -40,6 +42,7 @@ static char *input_line(struct input *input)
 
 static void input_next(struct input *input)
 {
+	input->lineno++;
 	input->buf[0] = '\0';
 }
 
@@ -169,7 +172,8 @@ static int runtest(char *filename, char *ironout)
 			char *testname = filename;
 			if (strchr(testname, '/'))
 				testname = strrchr(testname, '/') + 1;
-			printf("%s failed%s", testname, current_line);
+			printf("%s:%d %s",
+			       testname, input->lineno, current_line);
 			return 1;
 		}
 	}
