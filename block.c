@@ -124,7 +124,7 @@ static void handle_enum(struct block *block, struct node *node)
 		return;
 	if (node->children[0]->type == AST_IDENTIFIER)
 		hash_put(block_names(block),
-			 name_init(node->children[0]->data, 0));
+			 name_init(node->children[0]->data, NAME_ENUM));
 	for (i = 0; i < list->count; i++) {
 		/* ENUMLIST -> ENUMVAL -> IDENTIFIER */
 		struct node *child = list->children[i]->children[0];
@@ -141,9 +141,12 @@ static int find_names(struct node *node, void *data)
 	if (node->type == AST_ENUM)
 		handle_enum(block, node);
 	if (node->type == AST_STRUCT && node->count >= 3)
-		if (node->children[1]->type == AST_IDENTIFIER)
+		if (node->children[1]->type == AST_IDENTIFIER) {
+			int flags = node->children[0]->type == AST_STRUCTKW ?
+				NAME_STRUCT : NAME_UNION;
 			hash_put(block_names(block),
-				 name_init(node->children[1]->data, 0));
+				 name_init(node->children[1]->data, flags));
+		}
 	return block->node == node || decl_node(node);
 }
 
@@ -179,6 +182,17 @@ struct name *name_on(struct node *node)
 	int flags = 0;
 	if (node->type != AST_IDENTIFIER && node->type != AST_TYPENAME)
 		return NULL;
+	if (node->parent) {
+		if (node->parent->type == AST_ENUM)
+			flags |= NAME_ENUM;
+		if (node->parent->type == AST_STRUCT) {
+			enum nodetype type = node->parent->children[0]->type;
+			if (type == AST_STRUCTKW)
+				flags |= NAME_STRUCT;
+			else
+				flags |= NAME_UNION;
+		}
+	}
 	return name_init(node->data, flags);
 }
 
