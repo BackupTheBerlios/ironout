@@ -1,0 +1,11 @@
+: # test struct types
+---------------------
+: write test.c
+int f() {
+	struct obj {
+		int field1;
+	};
+	int obj;
+}
+: ironout find test.c 19
+18 21
