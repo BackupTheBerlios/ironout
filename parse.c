@@ -61,6 +61,8 @@ static void linear_lists(struct node *node)
 				cur = cur->children[0];
 			}
 		}
+		for (i = 0; i < n; i++)
+			newchildren[i]->parent = node;
 		free(node->children);
 		node->children = newchildren;
 		node->count = n;
@@ -98,8 +100,10 @@ struct node *push_node(enum nodetype type, long start, long end, int nchild)
 		int i;
 		node->count = nchild;
 		node->children = xmalloc(nchild * sizeof(struct node *));
-		for (i = nchild - 1; i >= 0; i--)
+		for (i = nchild - 1; i >= 0; i--) {
 			node->children[i] = nodestack[--nodecount];
+			node->children[i]->parent = node;
+		}
 	}
 	nodestack[nodecount++] = node;
 	return node;

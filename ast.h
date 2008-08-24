@@ -73,6 +73,7 @@ struct node {
 	enum nodetype type;
 	long start, end;
 	struct node **children;
+	struct node *parent;
 	int count;
 	void *data;
 };
