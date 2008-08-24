@@ -4,6 +4,7 @@
 #include "ast.h"
 #include "block.h"
 #include "hash.h"
+#include "name.h"
 
 
 static int parse_cmd(char *filename)
@@ -24,32 +25,37 @@ static int getname_cmd(char *filename, long offset)
 }
 
 struct finddata {
-	char *name;
-	long start, end;
+	struct block *block;
+	struct name *name;
 };
 
 static int checknode(struct node *node, void *data)
 {
 	struct finddata *finddata = data;
-	if (node->type == AST_IDENTIFIER || node->type == AST_TYPENAME)
-		if (!strcmp(node->data, finddata->name))
+	if (node->type == AST_IDENTIFIER || node->type == AST_TYPENAME) {
+		struct block *block = block_find(finddata->block, node->start);
+		if (block_lookup(block, node) == finddata->name)
 			printf("%ld %ld\n", node->start, node->end);
-	return finddata->start <= node->end && node->start < finddata->end;
+	}
+	/* don't check nodes outside defining block */
+	return 1;
 }
 
 static int find_cmd(char *filename, long offset)
 {
-	struct node *node = parse(filename);
-	struct block *block = block_init(node);
-	struct node *cnode = node_find(node, offset);
-	if (cnode->type == AST_IDENTIFIER || cnode->type == AST_TYPENAME) {
-		struct finddata finddata;
-		struct block *cblock = block_find(block, offset);
-		struct block *defblock = block_defining(cblock, cnode->data);
-		finddata.start = defblock->node->start;
-		finddata.end = defblock->node->end;
-		finddata.name = cnode->data;
-		node_walk(node, checknode, &finddata);
+	struct node *main_node = parse(filename);
+	struct block *main_block = block_init(main_node);
+	struct node *node = node_find(main_node, offset);
+	struct block *block = block_find(main_block, offset);
+	struct name *name = block_lookup(block, node);
+	if (name) {
+		struct block *defblock = block_defining(block, node);
+		if (defblock) {
+			struct finddata finddata;
+			finddata.block = defblock;
+			finddata.name = name;
+			node_walk(main_node, checknode, &finddata);
+		}
 	}
 	block_free(block);
 	node_free(node);
