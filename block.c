@@ -226,10 +226,44 @@ struct block *block_defining(struct block *block, struct node *node)
 	return block;
 }
 
+static int struct_node(struct node *node)
+{
+	if (!node)
+		return 0;
+	switch (node->type) {
+	case AST_DECL2:
+	case AST_DECL:
+	case AST_DECLLIST:
+	case AST_DECLSPEC:
+	case AST_DECLSTMT:
+		return struct_node(node->parent);
+	case AST_STRUCTBITS:
+	case AST_STRUCTDECLLIST:
+		return 1;
+	default:
+		return 0;
+	}
+}
+
+static int is_field(struct node *node)
+{
+	struct node *cur = node->parent;
+	if (!cur)
+		return 0;
+	if ((cur->type == AST_GETATTR || cur->type == AST_DEREF)
+	    && cur->children[1] == node)
+		return 1;
+	if (struct_node(cur))
+		return 1;
+	return 0;
+}
+
 struct name *block_lookup(struct block *block, struct node *node)
 {
 	struct name *name = name_on(node);
 	struct name *result = NULL;
+	if (is_field(node))
+		return NULL;
 	while (block) {
 		struct name *cur = hash_get(block_names(block), name);
 		if (cur) {
