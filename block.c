@@ -9,10 +9,8 @@
 struct block *block_init(struct node *node)
 {
 	struct block *block = xmalloc(sizeof(struct block));
+	memset(block, 0, sizeof(*block));
 	block->node = node;
-	block->children = NULL;
-	block->names = NULL;
-	block->parent = NULL;
 	return block;
 }
 
@@ -37,7 +35,7 @@ void block_free(struct block *block)
 	free(block);
 }
 
-int find_blocks(struct node *node, void *data)
+static int find_blocks(struct node *node, void *data)
 {
 	struct block *block = data;
 	if (node->type == AST_BLOCK && node != block->node) {
@@ -112,13 +110,14 @@ struct block *block_find(struct block *block, long offset)
 static int decl_node(struct node *node)
 {
 	switch (node->type) {
-	case AST_DECLLIST:
-	case AST_DECLSTMT:
-	case AST_INITLIST:
-	case AST_INIT:
-	case AST_DECL:
 	case AST_DECL2:
+	case AST_DECL:
+	case AST_DECLLIST:
 	case AST_DECLSPEC:
+	case AST_DECLSTMT:
+	case AST_FILE:
+	case AST_INIT:
+	case AST_INITLIST:
 	case AST_TYPE:
 		return 1;
 	default:

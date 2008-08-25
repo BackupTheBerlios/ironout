@@ -84,3 +84,20 @@ int g() {
 71 76
 : ironout find test.c 58
 57 61
+: # test global names
+---------------------
+: write test.c
+int var = 0;
+int f() {
+	{
+		int var = 1;
+		var++;
+	}
+	var++;
+}
+: ironout find test.c 43
+32 35
+43 46
+: ironout find test.c 54
+4 7
+54 57
