@@ -294,21 +294,21 @@ struct_or_union
 
 struct_declaration_list
 	: struct_declaration
-		{ push_node(AST_DECLLIST, @$.start, @$.end, 1); }
+		{ push_node(AST_STRUCTLIST, @$.start, @$.end, 1); }
 	| struct_declaration_list struct_declaration
-		{ push_node(AST_DECLLIST, @$.start, @$.end, 2); }
+		{ push_node(AST_STRUCTLIST, @$.start, @$.end, 2); }
 	;
 
 struct_declaration
 	: type_specifier_list struct_declarator_list ';'
-		{ push_node(AST_STRUCTDECL, @$.start, @$.end, 2); }
+		{ push_node(AST_STRUCTSTMT, @$.start, @$.end, 2); }
 	;
 
 struct_declarator_list
 	: struct_declarator
-		{ push_node(AST_DECLLIST, @$.start, @$.end, 1); }
+		{ push_node(AST_STRUCTDECLLIST, @$.start, @$.end, 1); }
 	| struct_declarator_list ',' struct_declarator
-		{ push_node(AST_DECLLIST, @$.start, @$.end, 2); }
+		{ push_node(AST_STRUCTDECLLIST, @$.start, @$.end, 2); }
 	;
 
 struct_declarator
