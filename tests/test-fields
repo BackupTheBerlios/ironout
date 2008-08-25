@@ -1,0 +1,14 @@
+: # not matching fields
+-----------------------
+: write test.c
+int var;
+struct obj {
+	int var;
+} o;
+int f()
+{
+	o.var++;
+	(&o)->var++;
+}
+: ironout find test.c 4
+4 7
