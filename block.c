@@ -53,7 +53,18 @@ int find_blocks(struct node *node, void *data)
 
 static void init_children(struct block *block)
 {
+	struct block_list *cur = NULL;
+	struct block_list *newhead = NULL;
 	node_walk(block->node, find_blocks, block);
+	/* reversing children order */
+	cur = block->children;
+	while (cur) {
+		struct block_list *next = cur->next;
+		cur->next = newhead;
+		newhead = cur;
+		cur = next;
+	}
+	block->children = newhead;
 	block->walked = 1;
 }
 
