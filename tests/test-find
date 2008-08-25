@@ -101,3 +101,20 @@ int f() {
 : ironout find test.c 54
 4 7
 54 57
+: # test global functions
+-------------------------
+: write test.c
+void g() {}
+int f() {
+	{
+		int g;
+		g++;
+	}
+	g();
+}
+: ironout find test.c 31
+31 32
+36 37
+: ironout find test.c 45
+5 6
+45 46

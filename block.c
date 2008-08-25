@@ -143,6 +143,15 @@ static void handle_enum(struct block *block, struct node *node)
 	}
 }
 
+static void handle_function(struct block *block, struct node *node)
+{
+	struct node *decl = node->children[node->count - 2];
+	struct node *cur = decl;
+	while (cur->type != AST_IDENTIFIER)
+		cur = cur->children[0];
+	hash_put(block_names(block), name_init(cur->data, NAME_FUNCTION));
+}
+
 static int find_names(struct node *node, void *data)
 {
 	struct block *block = data;
@@ -157,6 +166,8 @@ static int find_names(struct node *node, void *data)
 			hash_put(block_names(block),
 				 name_init(node->children[1]->data, flags));
 		}
+	if (node->type == AST_FUNCTION)
+		handle_function(block, node);
 	return block->node == node || decl_node(node);
 }
 
