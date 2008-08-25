@@ -43,12 +43,26 @@ static int list_size(struct node *node)
 	return result;
 }
 
+static void node_free_base(struct node *node, int children)
+{
+	if (children && node->children) {
+		int i;
+		for (i = 0; i < node->count; i++)
+			node_free(node->children[i]);
+		free(node->children);
+	}
+	if (node->data)
+		free(node->data);
+	free(node);
+}
+
 static void linear_lists(struct node *node)
 {
 	int n = list_size(node);
 	int i;
 	if (n) {
 		struct node *cur = node;
+		struct node *old = NULL;
 		struct node **newchildren = xmalloc(n * sizeof(struct node *));
 		int start = 0, end = n;
 		for (i = 0; i < n; i++) {
@@ -60,6 +74,9 @@ static void linear_lists(struct node *node)
 				newchildren[--end] = cur->children[1];
 				cur = cur->children[0];
 			}
+			if (old)
+				node_free_base(old, 0);
+			old = cur;
 		}
 		for (i = 0; i < n; i++)
 			newchildren[i]->parent = node;
@@ -120,15 +137,7 @@ struct node *push_node_name(enum nodetype type, long start, long end, char *name
 
 void node_free(struct node *node)
 {
-	if (node->children) {
-		int i;
-		for (i = 0; i < node->count; i++)
-			node_free(node->children[i]);
-		free(node->children);
-	}
-	if (node->data)
-		free(node->data);
-	free(node);
+	node_free_base(node, 1);
 }
 
 static int str_cmp(void *data, void *key)
