@@ -11,18 +11,24 @@ static struct node *nodestack[1024];
 static int nodecount = 0;
 static struct hash *typedef_hash = NULL;
 
-static enum nodetype listnodes[] = {
-	AST_FILE, AST_BODY, AST_IDLIST, AST_ENUMLIST,
-	AST_INITIALIZERLIST, AST_STRUCTLIST, AST_STMTLIST,
-	AST_SPECLIST, AST_EXPRLIST, AST_DECLLIST, AST_ARGLIST};
-
 static int list_nodetype(enum nodetype nodetype)
 {
-	int i;
-	for (i = 0; i < LENGTH(listnodes); i++)
-		if (nodetype == listnodes[i])
-			return 1;
-	return 0;
+	switch (nodetype) {
+	case AST_FILE:
+	case AST_BODY:
+	case AST_IDLIST:
+	case AST_ENUMLIST:
+	case AST_INITIALIZERLIST:
+	case AST_STRUCTLIST:
+	case AST_STMTLIST:
+	case AST_SPECLIST:
+	case AST_EXPRLIST:
+	case AST_DECLLIST:
+	case AST_ARGLIST:
+		return 1;
+	default:
+		return 0;
+	}
 }
 
 static int list_size(struct node *node)
