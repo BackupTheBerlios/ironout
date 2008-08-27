@@ -1,0 +1,9 @@
+: # test parameters
+-------------------
+: write test.c
+int f(int var) {
+	var++;
+}
+: ironout find test.c 18
+10 13
+18 21
