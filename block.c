@@ -38,7 +38,9 @@ void block_free(struct block *block)
 static int find_blocks(struct node *node, void *data)
 {
 	struct block *block = data;
-	if (node->type == AST_BLOCK && node != block->node) {
+	if (node == block->node)
+		return 1;
+	if (node->type == AST_BLOCK || node->type == AST_FUNCTION) {
 		struct block_list *newchild = xmalloc(sizeof(struct block_list));
 		newchild->block = block_init(node);
 		newchild->block->parent = block;
@@ -119,6 +121,8 @@ static int decl_node(struct node *node)
 	case AST_INIT:
 	case AST_INITLIST:
 	case AST_TYPE:
+	case AST_PARAMDECL:
+	case AST_PARAMLIST:
 		return 1;
 	default:
 		return 0;
@@ -188,7 +192,18 @@ int name_cmp(void *data, void *key)
 static void init_names(struct block *block)
 {
 	block->names = hash_init(name_hash, name_hash, name_cmp, 4);
-	node_walk(block->node, find_names, block);
+	if (block->node->type == AST_FUNCTION) {
+		/* FUNCTION -> DECL -> DECL2 -> PARAMLIST */
+		struct node *node = block->node;
+		struct node *decl = node->children[node->count - 2];
+		struct node *decl2 = decl->children[decl->count - 1];
+		if (decl2->count > 1) {
+			struct node *params = decl2->children[decl2->count - 1];
+			node_walk(params, find_names, block);
+		}
+	} else {
+		node_walk(block->node, find_names, block);
+	}
 }
 
 struct hash *block_names(struct block *block)
