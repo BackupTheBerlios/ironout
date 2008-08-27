@@ -14,17 +14,18 @@ static struct hash *typedef_hash = NULL;
 static int list_nodetype(enum nodetype nodetype)
 {
 	switch (nodetype) {
-	case AST_FILE:
-	case AST_BODY:
-	case AST_IDLIST:
-	case AST_ENUMLIST:
-	case AST_INITIALIZERLIST:
-	case AST_STRUCTLIST:
-	case AST_STMTLIST:
-	case AST_SPECLIST:
-	case AST_EXPRLIST:
-	case AST_DECLLIST:
 	case AST_ARGLIST:
+	case AST_BODY:
+	case AST_DECLLIST:
+	case AST_ENUMLIST:
+	case AST_EXPRLIST:
+	case AST_FILE:
+	case AST_IDLIST:
+	case AST_INITIALIZERLIST:
+	case AST_PARAMLIST:
+	case AST_SPECLIST:
+	case AST_STMTLIST:
+	case AST_STRUCTLIST:
 		return 1;
 	default:
 		return 0;
