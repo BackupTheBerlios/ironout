@@ -234,15 +234,15 @@ init_declarator
 
 storage_class_specifier
 	: TYPEDEF
-		{ push_node(AST_STORAGECLASS, @$.start, @$.end, 0); }
+		{ push_node(AST_TYPEDEFKW, @$.start, @$.end, 0); }
 	| EXTERN
-		{ push_node(AST_STORAGECLASS, @$.start, @$.end, 0); }
+		{ push_node(AST_EXTERNKW, @$.start, @$.end, 0); }
 	| STATIC
-		{ push_node(AST_STORAGECLASS, @$.start, @$.end, 0); }
+		{ push_node(AST_STATICKW, @$.start, @$.end, 0); }
 	| AUTO
-		{ push_node(AST_STORAGECLASS, @$.start, @$.end, 0); }
+		{ push_node(AST_AUTOKW, @$.start, @$.end, 0); }
 	| REGISTER
-		{ push_node(AST_STORAGECLASS, @$.start, @$.end, 0); }
+		{ push_node(AST_REGISTERKW, @$.start, @$.end, 0); }
 	;
 
 type_specifier
