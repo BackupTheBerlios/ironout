@@ -17,6 +17,7 @@ static int list_nodetype(enum nodetype nodetype)
 	case AST_ARGLIST:
 	case AST_BODY:
 	case AST_DECLLIST:
+	case AST_DECLSPEC:
 	case AST_ENUMLIST:
 	case AST_EXPRLIST:
 	case AST_FILE:
@@ -113,6 +114,30 @@ struct node *parse(char *filename)
 	return nodestack[--nodecount];
 }
 
+static int str_cmp(void *data, void *key)
+{
+	return strcmp(data, key);
+}
+
+static void add_type(char *typename)
+{
+	if (!typedef_hash)
+		typedef_hash = hash_init(str_hash, str_hash, str_cmp, 16);
+	hash_put(typedef_hash, typename);
+}
+
+static int search_typedefs(struct node *node, void *data)
+{
+	int *istypedef = data;
+	if (node->type == AST_TYPEDEFKW)
+		*istypedef = 1;
+
+	if (*istypedef && node->parent &&
+	    node->type == AST_IDENTIFIER && node->parent->type == AST_DECL2)
+		add_type(node->data);
+	return 1;
+}
+
 struct node *push_node(enum nodetype type, long start, long end, int nchild)
 {
 	struct node *node = xmalloc(sizeof(struct node));
@@ -125,8 +150,14 @@ struct node *push_node(enum nodetype type, long start, long end, int nchild)
 		node->count = nchild;
 		node->children = xmalloc(nchild * sizeof(struct node *));
 		for (i = nchild - 1; i >= 0; i--) {
-			node->children[i] = nodestack[--nodecount];
-			node->children[i]->parent = node;
+			struct node *child = nodestack[--nodecount];
+			node->children[i] = child;
+			child->parent = node;
+			if (node->type != AST_DECLSTMT &&
+			    child->type == AST_DECLSTMT) {
+				int istypedef = 0;
+				node_walk(child, search_typedefs, &istypedef);
+			}
 		}
 	}
 	nodestack[nodecount++] = node;
@@ -147,16 +178,8 @@ void node_free(struct node *node)
 	node_free_base(node, 1);
 }
 
-static int str_cmp(void *data, void *key)
-{
-	return strcmp(data, key);
-}
-
 int is_typename(char *name)
 {
-	if (!typedef_hash) {
-		typedef_hash = hash_init(str_hash, str_hash, str_cmp, 16);
-		hash_put(typedef_hash, "FILE");
-	}
+	add_type("FILE");
 	return hash_get(typedef_hash, name) != NULL;
 }
