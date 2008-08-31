@@ -1,7 +1,8 @@
 : # test parameters
 -------------------
 : write test.c
-int f(int var) {
+int f(int var)
+{
 	var++;
 }
 : ironout find test.c 18
