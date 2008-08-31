@@ -3,24 +3,27 @@
 #include <string.h>
 #include "ast.h"
 #include "block.h"
+#include "cfile.h"
 #include "hash.h"
 #include "name.h"
 
 
 static int parse_cmd(char *filename)
 {
-	node_free(parse(filename));
-	return 0;
+	struct cfile *cfile = cfile_init(filename);
+	if (cfile)
+		cfile_free(cfile);
+	return !!cfile;
 }
 
 static int getname_cmd(char *filename, long offset)
 {
-	struct node *node = parse(filename);
-	struct node *found = node_find(node, offset);
+	struct cfile *cfile = cfile_init(filename);
+	struct node *found = node_find(cfile->node, offset);
 	if (found && (found->type == AST_IDENTIFIER ||
 		      found->type == AST_TYPENAME))
 		puts(found->data);
-	node_free(node);
+	cfile_free(cfile);
 	return 0;
 }
 
@@ -43,10 +46,9 @@ static int checknode(struct node *node, void *data)
 
 static int find_cmd(char *filename, long offset)
 {
-	struct node *main_node = parse(filename);
-	struct block *main_block = block_init(main_node);
-	struct node *node = node_find(main_node, offset);
-	struct block *block = block_find(main_block, offset);
+	struct cfile *cfile = cfile_init(filename);
+	struct node *node = node_find(cfile->node, offset);
+	struct block *block = block_find(cfile->block, offset);
 	struct name *name = block_lookup(block, node);
 	if (name) {
 		struct block *defblock = block_defining(block, node);
@@ -54,11 +56,10 @@ static int find_cmd(char *filename, long offset)
 			struct finddata finddata;
 			finddata.block = defblock;
 			finddata.name = name;
-			node_walk(main_node, checknode, &finddata);
+			node_walk(cfile->node, checknode, &finddata);
 		}
 	}
-	block_free(block);
-	node_free(node);
+	cfile_free(cfile);
 	return 0;
 }
 
