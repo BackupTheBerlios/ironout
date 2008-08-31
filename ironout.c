@@ -4,6 +4,7 @@
 #include "ast.h"
 #include "block.h"
 #include "cfile.h"
+#include "find.h"
 #include "hash.h"
 #include "name.h"
 
@@ -27,38 +28,16 @@ static int getname_cmd(char *filename, long offset)
 	return 0;
 }
 
-struct finddata {
-	struct block *block;
-	struct name *name;
-};
-
-static int checknode(struct node *node, void *data)
-{
-	struct finddata *finddata = data;
-	if (node->type == AST_IDENTIFIER || node->type == AST_TYPENAME) {
-		struct block *block = block_find(finddata->block, node->start);
-		if (block_lookup(block, node) == finddata->name)
-			printf("%ld %ld\n", node->start, node->end);
-	}
-	/* don't check nodes outside defining block */
-	return 1;
-}
-
 static int find_cmd(char *filename, long offset)
 {
 	struct cfile *cfile = cfile_init(filename);
-	struct node *node = node_find(cfile->node, offset);
-	struct block *block = block_find(cfile->block, offset);
-	struct name *name = block_lookup(block, node);
-	if (name) {
-		struct block *defblock = block_defining(block, node);
-		if (defblock) {
-			struct finddata finddata;
-			finddata.block = defblock;
-			finddata.name = name;
-			node_walk(cfile->node, checknode, &finddata);
-		}
+	struct occurrence *occurrences = find_at(cfile, offset);
+	struct occurrence *cur = occurrences;
+	while (cur) {
+		printf("%ld %ld\n", cur->start, cur->end);
+		cur = cur->next;
 	}
+	free_occurrences(occurrences);
 	cfile_free(cfile);
 	return 0;
 }
