@@ -8,4 +8,4 @@ int f() {
 	int obj;
 }
 : ironout find test.c 19
-18 21
+test.c 18 21

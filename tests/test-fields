@@ -11,4 +11,4 @@ int f()
 	(&o)->var++;
 }
 : ironout find test.c 4
-4 7
+test.c 4 7

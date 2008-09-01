@@ -6,5 +6,5 @@ int f(int var)
 	var++;
 }
 : ironout find test.c 18
-10 13
-18 21
+test.c 10 13
+test.c 18 21

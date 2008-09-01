@@ -34,7 +34,7 @@ static int find_cmd(char *filename, long offset)
 	struct occurrence *occurrences = find_at(cfile, offset);
 	struct occurrence *cur = occurrences;
 	while (cur) {
-		printf("%ld %ld\n", cur->start, cur->end);
+		printf("%s %ld %ld\n", cur->cfile->name, cur->start, cur->end);
 		cur = cur->next;
 	}
 	free_occurrences(occurrences);
