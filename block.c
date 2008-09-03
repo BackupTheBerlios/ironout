@@ -151,8 +151,14 @@ static void handle_function(struct block *block, struct node *node)
 {
 	struct node *decl = node->children[node->count - 2];
 	struct node *cur = decl;
-	while (cur->type != AST_IDENTIFIER)
-		cur = cur->children[0];
+	while (cur->type != AST_IDENTIFIER) {
+		if (!cur->count)
+			return;
+		if (cur->type == AST_PTR)
+			cur = cur->children[cur->count - 1];
+		else
+			cur = cur->children[0];
+	}
 	hash_put(block_names(block), name_init(cur->data, NAME_FUNCTION));
 }
 
