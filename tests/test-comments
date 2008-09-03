@@ -1,0 +1,8 @@
+: # test parameters
+-------------------
+: write test.c
+/* this is a variable */
+int var;
+/* end of variable */
+: ironout find test.c 29
+test.c 29 32
