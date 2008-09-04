@@ -9,7 +9,6 @@
 
 static struct node *nodestack[1024];
 static int nodecount = 0;
-static struct hash *typedef_hash = NULL;
 
 static int list_nodetype(enum nodetype nodetype)
 {
@@ -109,36 +108,15 @@ struct node *parse(char *filename)
 	fclose(file);
 	reset_tokenizer();
 	if (nodecount != 1)
-		printf("ERROR: %d nodes on the stack\n", nodecount);
+		fprintf(stderr, "ERROR: %d nodes on the stack\n", nodecount);
 	else
 		linear_lists(nodestack[0]);
-	hash_release(typedef_hash);
-	typedef_hash = NULL;
 	return nodestack[--nodecount];
 }
 
 static int str_cmp(void *data, void *key)
 {
 	return strcmp(data, key);
-}
-
-static void add_type(char *typename)
-{
-	if (!typedef_hash)
-		typedef_hash = hash_init(str_hash, str_hash, str_cmp, 16);
-	hash_put(typedef_hash, typename);
-}
-
-static int search_typedefs(struct node *node, void *data)
-{
-	int *istypedef = data;
-	if (node->type == AST_TYPEDEFKW)
-		*istypedef = 1;
-
-	if (*istypedef && node->parent &&
-	    node->type == AST_IDENTIFIER && node->parent->type == AST_DIRDECL)
-		add_type(node->data);
-	return 1;
 }
 
 struct node *push_node(enum nodetype type, long start, long end, int nchild)
@@ -156,11 +134,6 @@ struct node *push_node(enum nodetype type, long start, long end, int nchild)
 			struct node *child = nodestack[--nodecount];
 			node->children[i] = child;
 			child->parent = node;
-			if (node->type != AST_DECLSTMT &&
-			    child->type == AST_DECLSTMT) {
-				int istypedef = 0;
-				node_walk(child, search_typedefs, &istypedef);
-			}
 		}
 	}
 	nodestack[nodecount++] = node;
@@ -181,8 +154,18 @@ void node_free(struct node *node)
 	node_free_base(node, 1);
 }
 
+static struct hash *typedefs = NULL;
+
+static void add_type(char *typename)
+{
+	if (!typedefs)
+		typedefs = hash_init(str_hash, str_hash, str_cmp, 16);
+	hash_put(typedefs, typename);
+}
+
 int is_typename(char *name)
 {
-	add_type("FILE");
-	return hash_get(typedef_hash, name) != NULL;
+	if (!typedefs)
+		add_type("FILE");
+	return hash_get(typedefs, name) != NULL;
 }
