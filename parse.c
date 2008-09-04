@@ -15,18 +15,20 @@ static int list_nodetype(enum nodetype nodetype)
 {
 	switch (nodetype) {
 	case AST_ARGLIST:
+	case AST_BLOCKLIST:
 	case AST_BODY:
 	case AST_DECLLIST:
 	case AST_DECLSPEC:
+	case AST_DESIGLIST:
 	case AST_ENUMLIST:
 	case AST_EXPRLIST:
 	case AST_FILE:
-	case AST_IDLIST:
 	case AST_INITIALIZERLIST:
+	case AST_INITLIST:
 	case AST_PARAMLIST:
-	case AST_SPECLIST:
-	case AST_STMTLIST:
 	case AST_STRUCTLIST:
+	case AST_STRUCTQUALLIST:
+	case AST_TYPEQUALLIST:
 		return 1;
 	default:
 		return 0;
