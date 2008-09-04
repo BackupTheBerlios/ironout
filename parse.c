@@ -135,7 +135,7 @@ static int search_typedefs(struct node *node, void *data)
 		*istypedef = 1;
 
 	if (*istypedef && node->parent &&
-	    node->type == AST_IDENTIFIER && node->parent->type == AST_DECL2)
+	    node->type == AST_IDENTIFIER && node->parent->type == AST_DIRDECL)
 		add_type(node->data);
 	return 1;
 }

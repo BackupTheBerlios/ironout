@@ -388,28 +388,28 @@ declarator
 
 direct_declarator
 	: identifier
-		{ push_node(AST_DECL2, @$.start, @$.end, 1); }
+		{ push_node(AST_DIRDECL, @$.start, @$.end, 1); }
 	| '(' declarator ')'
-		{ push_node(AST_DECL2, @$.start, @$.end, 1); }
+		{ push_node(AST_DIRDECL, @$.start, @$.end, 1); }
 
 	| direct_declarator '[' ']'
-		{ push_node(AST_DECL2, @$.start, @$.end, 1); }
+		{ push_node(AST_DIRDECL, @$.start, @$.end, 1); }
 	| direct_declarator '[' type_qualifier_list ']'
-		{ push_node(AST_DECL2, @$.start, @$.end, 2); }
+		{ push_node(AST_DIRDECL, @$.start, @$.end, 2); }
 	| direct_declarator '[' assignment_expr ']'
-		{ push_node(AST_DECL2, @$.start, @$.end, 2); }
+		{ push_node(AST_DIRDECL, @$.start, @$.end, 2); }
 	| direct_declarator '[' type_qualifier_list assignment_expr ']'
-		{ push_node(AST_DECL2, @$.start, @$.end, 3); }
+		{ push_node(AST_DIRDECL, @$.start, @$.end, 3); }
 
 	| direct_declarator '[' STATIC assignment_expr ']'
-		{ push_node(AST_DECL2, @$.start, @$.end, 2); }
+		{ push_node(AST_DIRDECL, @$.start, @$.end, 2); }
 	| direct_declarator '[' STATIC type_qualifier_list assignment_expr ']'
-		{ push_node(AST_DECL2, @$.start, @$.end, 3); }
+		{ push_node(AST_DIRDECL, @$.start, @$.end, 3); }
 
 	| direct_declarator '[' '*' ']'
-		{ push_node(AST_DECL2, @$.start, @$.end, 1); }
+		{ push_node(AST_DIRDECL, @$.start, @$.end, 1); }
 	| direct_declarator '[' type_qualifier_list '*' ']'
-		{ push_node(AST_DECL2, @$.start, @$.end, 2); }
+		{ push_node(AST_DIRDECL, @$.start, @$.end, 2); }
 
 	| direct_declarator '[' type_qualifier_list STATIC assignment_expr ']'
 	;
@@ -468,43 +468,43 @@ abstract_declarator
 
 direct_abstract_declarator
 	: '(' abstract_declarator ')'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 1); }
 
 	| '[' ']'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 0); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 0); }
 	| '[' assignment_expr ']'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 1); }
 	| '[' type_qualifier_list ']'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 1); }
 	| '[' type_qualifier_list assignment_expr ']'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 2); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 2); }
 	| direct_abstract_declarator '[' ']'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 1); }
 	| direct_abstract_declarator '[' assignment_expr ']'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 2); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 2); }
 	| direct_abstract_declarator '[' type_qualifier_list ']'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 2); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 2); }
 	| direct_abstract_declarator '[' type_qualifier_list assignment_expr ']'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 3); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 3); }
 
 	| '[' type_qualifier_list STATIC assignment_expr ']'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 2); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 2); }
 	| direct_abstract_declarator '[' type_qualifier_list STATIC assignment_expr ']'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 3); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 3); }
 
 	| '[' '*' ']'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 0); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 0); }
 	| direct_abstract_declarator '[' '*' ']'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 1); }
 
 	| '(' ')'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 0); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 0); }
 	| '(' parameter_type_list ')'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 1); }
 	| direct_abstract_declarator '(' ')'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 1); }
 	| direct_abstract_declarator '(' parameter_type_list ')'
-		{ push_node(AST_ADECL2, @$.start, @$.end, 2); }
+		{ push_node(AST_ADIRDECL, @$.start, @$.end, 2); }
 	;
 
 initializer
