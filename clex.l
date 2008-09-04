@@ -17,6 +17,10 @@ static int check_type();
 
 %%
 "/*"([^\*]|\*[^/])*"*/"	{ ignore(); }
+"//"[^\n]*		{ ignore(); }
+"_Bool"			{ count(); return BOOL; }
+"_Complex"		{ count(); return COMPLEX; }
+"_Imaginary"		{ count(); return IMAGINARY; }
 "auto"			{ count(); return AUTO; }
 "break"			{ count(); return BREAK; }
 "case"			{ count(); return CASE; }
@@ -33,9 +37,11 @@ static int check_type();
 "for"			{ count(); return FOR; }
 "goto"			{ count(); return GOTO; }
 "if"			{ count(); return IF; }
+"inline"		{ count(); return INLINE; }
 "int"			{ count(); return INT; }
 "long"			{ count(); return LONG; }
 "register"		{ count(); return REGISTER; }
+"restrict"		{ count(); return RESTRICT; }
 "return"		{ count(); return RETURN; }
 "short"			{ count(); return SHORT; }
 "signed"		{ count(); return SIGNED; }
@@ -62,7 +68,7 @@ static int check_type();
 {D}+"."{D}*({E})?{FS}?	{ count(); return CONSTANT; }
 
 \"(\\.|[^\\"])*\"	{ count(); return STRING_LITERAL; }
-#([^\n]|\\\n)+	{ count(); return MACRO; }
+#([^\n]|\\\n)+		{ count(); return MACRO; }
 
 ">>="			{ count(); return RIGHT_ASSIGN; }
 "<<="			{ count(); return LEFT_ASSIGN; }
@@ -111,7 +117,7 @@ static int check_type();
 "?"			{ count(); return '?'; }
 
 [ \t\v\n\f]		{ ignore(); }
-.			{ /* ignore bad characters */ }
+.			{ ignore(); }
 
 %%
 
