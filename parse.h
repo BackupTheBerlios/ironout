@@ -3,6 +3,7 @@
 
 #define YYLTYPE struct yyltype
 #define YYSTYPE char*
+#define YYERROR_VERBOSE	1
 #define YYLLOC_DEFAULT(Current, Rhs, N)					\
 	do								\
 		if (N) {						\
