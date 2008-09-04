@@ -703,6 +703,5 @@ identifier
 void yyerror(char *s)
 {
 	extern long token_offset;
-	fflush(stdout);
-	printf("parsing error on %ld: %s\n", token_offset, s);
+	fprintf(stderr, "parsing error on %ld: %s\n", token_offset, s);
 }

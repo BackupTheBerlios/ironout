@@ -9,7 +9,7 @@
 			(Current).start = YYRHSLOC(Rhs, 1).start;	\
 			(Current).end = YYRHSLOC(Rhs, N).end;		\
 		} else {						\
-			printf("WARNING: couldn't find location!\n");	\
+			fprintf(stderr, "WARNING: couldn't find location!\n"); \
 		}							\
 	while (0)
 
