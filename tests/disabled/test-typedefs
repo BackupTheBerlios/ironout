@@ -1,0 +1,15 @@
+: # test typedefs
+-----------------
+: write test.c
+typedef int mytype;
+mytype var;
+: ironout parse test.c
+: # test overwritten typedefs
+-----------------------------
+: write test.c
+typedef int mytype;
+void f()
+{
+	mytype mytype = 1;
+}
+: ironout parse test.c

@@ -1,6 +1,0 @@
-: # test parameters
--------------------
-: write test.c
-typedef int mytype;
-mytype var;
-: ironout parse test.c
