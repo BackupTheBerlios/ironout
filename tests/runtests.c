@@ -129,7 +129,8 @@ static int exec_ironout(struct input *input, char *ironout)
 	if (!(output = popen(command, "r")))
 		return 1;
 	result = match_files(input, output);
-	pclose(output);
+	if (pclose(output))
+		return 1;
 	return result;
 }
 
