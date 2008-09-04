@@ -8,3 +8,15 @@ int f(int var)
 : ironout find test.c 18
 test.c 10 13
 test.c 18 21
+: # test old-style parameters
+-----------------------------
+: write test.c
+void f(var)
+int var;
+{
+	var++;
+}
+: ironout find test.c 24
+test.c 7 10
+test.c 16 19
+test.c 24 27
