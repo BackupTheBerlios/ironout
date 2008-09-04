@@ -147,9 +147,7 @@ static void ignore()
 
 static int check_type()
 {
-	if (is_typename(yytext))
-		return TYPE_NAME;
-	return IDENTIFIER;
+	return is_typename(yytext) ? TYPE_NAME : IDENTIFIER;
 }
 
 void reset_tokenizer()
