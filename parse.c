@@ -26,6 +26,7 @@ static int list_nodetype(enum nodetype nodetype)
 	case AST_INITIALIZERLIST:
 	case AST_INITLIST:
 	case AST_PARAMLIST:
+	case AST_STRUCTDECLLIST:
 	case AST_STRUCTLIST:
 	case AST_STRUCTQUALLIST:
 	case AST_TYPEQUALLIST:

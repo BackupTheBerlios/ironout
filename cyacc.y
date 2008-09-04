@@ -330,7 +330,10 @@ specifier_qualifier_list
 
 struct_declarator_list
 	: struct_declarator
+		{ push_node(AST_STRUCTDECLLIST, @$.start, @$.end, 1); }
 	| struct_declarator_list ',' struct_declarator
+		{ push_node(AST_STRUCTDECLLIST, @$.start, @$.end, 2); }
+	;
 
 struct_declarator
 	: declarator
