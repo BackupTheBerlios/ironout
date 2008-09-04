@@ -17,7 +17,7 @@
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
-%start file
+%start translation_unit
 %%
 
 primary_expr
@@ -45,6 +45,10 @@ postfix_expr
 		{ push_node(AST_UNARY, @$.start, @$.end, 1); }
 	| postfix_expr DEC_OP
 		{ push_node(AST_UNARY, @$.start, @$.end, 1); }
+	| '(' type_name ')' '{' initializer_list '}'
+		{ push_node(AST_C99INIT, @$.start, @$.end, 2); }
+	| '(' type_name ')' '{' initializer_list ',' '}'
+		{ push_node(AST_C99INIT, @$.start, @$.end, 2); }
 	;
 
 argument_expr_list
@@ -218,6 +222,14 @@ declaration_specifiers
 		{ push_node(AST_DECLSPEC, @$.start, @$.end, 1); }
 	| type_specifier declaration_specifiers
 		{ push_node(AST_DECLSPEC, @$.start, @$.end, 2); }
+	| type_qualifier
+		{ push_node(AST_DECLSPEC, @$.start, @$.end, 1); }
+	| type_qualifier declaration_specifiers
+		{ push_node(AST_DECLSPEC, @$.start, @$.end, 2); }
+	| function_specifier
+		{ push_node(AST_DECLSPEC, @$.start, @$.end, 1); }
+	| function_specifier declaration_specifiers
+		{ push_node(AST_DECLSPEC, @$.start, @$.end, 2); }
 	;
 
 init_declarator_list
@@ -247,7 +259,9 @@ storage_class_specifier
 	;
 
 type_specifier
-	: CHAR
+	: VOID
+		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
+	| CHAR
 		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
 	| SHORT
 		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
@@ -255,19 +269,17 @@ type_specifier
 		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
 	| LONG
 		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
-	| SIGNED
-		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
-	| UNSIGNED
-		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
 	| FLOAT
 		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
 	| DOUBLE
 		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
-	| CONST
+	| SIGNED
 		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
-	| VOLATILE
+	| UNSIGNED
 		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
-	| VOID
+	| BOOL
+		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
+	| COMPLEX
 		{ push_node(AST_TYPE, @$.start, @$.end, 0); }
 	| struct_or_union_specifier
 		{ push_node(AST_TYPE, @$.start, @$.end, 1); }
@@ -301,21 +313,27 @@ struct_declaration_list
 	;
 
 struct_declaration
-	: type_specifier_list struct_declarator_list ';'
-		{ push_node(AST_STRUCTSTMT, @$.start, @$.end, 2); }
+	: type_qualifier_list struct_declarator_list ';'
+		{ push_node(AST_STRUCTDECL, @$.start, @$.end, 2); }
+	;
+
+specifier_qualifier_list
+	: type_specifier ';'
+		{ push_node(AST_STRUCTQUALLIST, @$.start, @$.end, 1); }
+	| type_specifier specifier_qualifier_list ';'
+		{ push_node(AST_STRUCTQUALLIST, @$.start, @$.end, 2); }
+	| type_qualifier ';'
+		{ push_node(AST_STRUCTQUALLIST, @$.start, @$.end, 1); }
+	| type_qualifier specifier_qualifier_list ';'
+		{ push_node(AST_STRUCTQUALLIST, @$.start, @$.end, 2); }
 	;
 
 struct_declarator_list
 	: struct_declarator
-		{ push_node(AST_STRUCTDECLLIST, @$.start, @$.end, 1); }
 	| struct_declarator_list ',' struct_declarator
-		{ push_node(AST_STRUCTDECLLIST, @$.start, @$.end, 2); }
-	;
 
 struct_declarator
 	: declarator
-	| ':' constant_expr
-		{ push_node(AST_STRUCTBITS, @$.start, @$.end, 1); }
 	| declarator ':' constant_expr
 		{ push_node(AST_STRUCTBITS, @$.start, @$.end, 2); }
 	;
@@ -324,6 +342,10 @@ enum_specifier
 	: ENUM '{' enumerator_list '}'
 		{ push_node(AST_ENUM, @$.start, @$.end, 1); }
 	| ENUM identifier '{' enumerator_list '}'
+		{ push_node(AST_ENUM, @$.start, @$.end, 2); }
+	| ENUM '{' enumerator_list ',' '}'
+		{ push_node(AST_ENUM, @$.start, @$.end, 1); }
+	| ENUM identifier '{' enumerator_list ',' '}'
 		{ push_node(AST_ENUM, @$.start, @$.end, 2); }
 	| ENUM identifier
 		{ push_node(AST_ENUM, @$.start, @$.end, 1); }
@@ -343,58 +365,71 @@ enumerator
 		{ push_node(AST_ENUMVAL, @$.start, @$.end, 2); }
 	;
 
+type_qualifier
+	: CONST
+		{ push_node(AST_TYPEQUAL, @$.start, @$.end, 1); }
+	| RESTRICT
+		{ push_node(AST_TYPEQUAL, @$.start, @$.end, 1); }
+	| VOLATILE
+		{ push_node(AST_TYPEQUAL, @$.start, @$.end, 1); }
+	;
+
+function_specifier
+	: INLINE
+		{ push_node(AST_FUNCSPEC, @$.start, @$.end, 1); }
+	;
+
 declarator
-	: declarator2
+	: direct_declarator
 		{ push_node(AST_DECL, @$.start, @$.end, 1); }
-	| pointer declarator2
+	| pointer direct_declarator
 		{ push_node(AST_DECL, @$.start, @$.end, 2); }
 	;
 
-declarator2
+direct_declarator
 	: identifier
 		{ push_node(AST_DECL2, @$.start, @$.end, 1); }
 	| '(' declarator ')'
 		{ push_node(AST_DECL2, @$.start, @$.end, 1); }
-	| declarator2 '[' ']'
+
+	| direct_declarator '[' ']'
 		{ push_node(AST_DECL2, @$.start, @$.end, 1); }
-	| declarator2 '[' constant_expr ']'
+	| direct_declarator '[' type_qualifier_list ']'
 		{ push_node(AST_DECL2, @$.start, @$.end, 2); }
-	| declarator2 '(' ')'
+	| direct_declarator '[' assignment_expr ']'
+		{ push_node(AST_DECL2, @$.start, @$.end, 2); }
+	| direct_declarator '[' type_qualifier_list assignment_expr ']'
+		{ push_node(AST_DECL2, @$.start, @$.end, 3); }
+
+	| direct_declarator '[' STATIC assignment_expr ']'
+		{ push_node(AST_DECL2, @$.start, @$.end, 2); }
+	| direct_declarator '[' STATIC type_qualifier_list assignment_expr ']'
+		{ push_node(AST_DECL2, @$.start, @$.end, 3); }
+
+	| direct_declarator '[' '*' ']'
 		{ push_node(AST_DECL2, @$.start, @$.end, 1); }
-	| declarator2 '(' parameter_type_list ')'
+	| direct_declarator '[' type_qualifier_list '*' ']'
 		{ push_node(AST_DECL2, @$.start, @$.end, 2); }
-	| declarator2 '(' parameter_identifier_list ')'
-		{ push_node(AST_DECL2, @$.start, @$.end, 2); }
+
+	| direct_declarator '[' type_qualifier_list STATIC assignment_expr ']'
 	;
 
 pointer
 	: '*'
 		{ push_node(AST_PTR, @$.start, @$.end, 0); }
-	| '*' type_specifier_list
+	| '*' type_qualifier_list
 		{ push_node(AST_PTR, @$.start, @$.end, 1); }
 	| '*' pointer
 		{ push_node(AST_PTR, @$.start, @$.end, 1); }
-	| '*' type_specifier_list pointer
+	| '*' type_qualifier_list pointer
 		{ push_node(AST_PTR, @$.start, @$.end, 2); }
 	;
 
-type_specifier_list
-	: type_specifier
-		{ push_node(AST_SPECLIST, @$.start, @$.end, 1); }
-	| type_specifier_list type_specifier
-		{ push_node(AST_SPECLIST, @$.start, @$.end, 2); }
-	;
-
-parameter_identifier_list
-	: identifier_list
-	| identifier_list ',' ELIPSIS
-	;
-
-identifier_list
-	: identifier
-		{ push_node(AST_IDLIST, @$.start, @$.end, 1); }
-	| identifier_list ',' identifier
-		{ push_node(AST_IDLIST, @$.start, @$.end, 2); }
+type_qualifier_list
+	: type_qualifier
+		{ push_node(AST_TYPEQUALLIST, @$.start, @$.end, 1); }
+	| type_qualifier_list type_qualifier
+		{ push_node(AST_TYPEQUALLIST, @$.start, @$.end, 2); }
 	;
 
 parameter_type_list
@@ -410,42 +445,65 @@ parameter_list
 	;
 
 parameter_declaration
-	: type_specifier_list declarator
+	: declaration_specifiers
+		{ push_node(AST_PARAMDECL, @$.start, @$.end, 1); }
+	| declaration_specifiers declarator
 		{ push_node(AST_PARAMDECL, @$.start, @$.end, 2); }
-	| type_name
+	| declaration_specifiers abstract_declarator
+		{ push_node(AST_PARAMDECL, @$.start, @$.end, 2); }
 	;
 
 type_name
-	: type_specifier_list
-	| type_specifier_list abstract_declarator
+	: specifier_qualifier_list
+	| specifier_qualifier_list abstract_declarator
 		{ push_node(AST_ATYPE, @$.start, @$.end, 2); }
 	;
 
 abstract_declarator
 	: pointer
-	| abstract_declarator2
-	| pointer abstract_declarator2
+	| direct_abstract_declarator
+	| pointer direct_abstract_declarator
 		{ push_node(AST_ADECL, @$.start, @$.end, 2); }
 	;
 
-abstract_declarator2
+direct_abstract_declarator
 	: '(' abstract_declarator ')'
 		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
+
 	| '[' ']'
 		{ push_node(AST_ADECL2, @$.start, @$.end, 0); }
-	| '[' constant_expr ']'
+	| '[' assignment_expr ']'
 		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
-	| abstract_declarator2 '[' ']'
+	| '[' type_qualifier_list ']'
 		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
-	| abstract_declarator2 '[' constant_expr ']'
+	| '[' type_qualifier_list assignment_expr ']'
 		{ push_node(AST_ADECL2, @$.start, @$.end, 2); }
+	| direct_abstract_declarator '[' ']'
+		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
+	| direct_abstract_declarator '[' assignment_expr ']'
+		{ push_node(AST_ADECL2, @$.start, @$.end, 2); }
+	| direct_abstract_declarator '[' type_qualifier_list ']'
+		{ push_node(AST_ADECL2, @$.start, @$.end, 2); }
+	| direct_abstract_declarator '[' type_qualifier_list assignment_expr ']'
+		{ push_node(AST_ADECL2, @$.start, @$.end, 3); }
+
+	| '[' type_qualifier_list STATIC assignment_expr ']'
+		{ push_node(AST_ADECL2, @$.start, @$.end, 2); }
+	| direct_abstract_declarator '[' type_qualifier_list STATIC assignment_expr ']'
+		{ push_node(AST_ADECL2, @$.start, @$.end, 3); }
+
+	| '[' '*' ']'
+		{ push_node(AST_ADECL2, @$.start, @$.end, 0); }
+	| direct_abstract_declarator '[' '*' ']'
+		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
+
 	| '(' ')'
 		{ push_node(AST_ADECL2, @$.start, @$.end, 0); }
 	| '(' parameter_type_list ')'
 		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
-	| abstract_declarator2 '(' ')'
+	| direct_abstract_declarator '(' ')'
 		{ push_node(AST_ADECL2, @$.start, @$.end, 1); }
-	| abstract_declarator2 '(' parameter_type_list ')'
+	| direct_abstract_declarator '(' parameter_type_list ')'
 		{ push_node(AST_ADECL2, @$.start, @$.end, 2); }
 	;
 
@@ -460,9 +518,32 @@ initializer
 initializer_list
 	: initializer
 		{ push_node(AST_INITIALIZERLIST, @$.start, @$.end, 1); }
+	| designation initializer
+		{ push_node(AST_INITIALIZERLIST, @$.start, @$.end, 2); }
+
 	| initializer_list ',' initializer
 		{ push_node(AST_INITIALIZERLIST, @$.start, @$.end, 2); }
+	| initializer_list ',' designation initializer
+		{ push_node(AST_INITIALIZERLIST, @$.start, @$.end, 3); }
 	;
+
+designation
+	: designator_list '='
+		{ push_node(AST_DESIGNATION, @$.start, @$.end, 1); }
+	;
+
+designator_list
+	: designator
+		{ push_node(AST_DESIGLIST, @$.start, @$.end, 1); }
+	| designator_list designator
+		{ push_node(AST_DESIGLIST, @$.start, @$.end, 2); }
+	;
+
+designator
+	: '[' constant_expr ']'
+		{ push_node(AST_DESIGNATOR, @$.start, @$.end, 1); }
+	| '.' identifier
+		{ push_node(AST_DESIGNATOR, @$.start, @$.end, 1); }
 
 statement
 	: labeled_statement
@@ -486,26 +567,20 @@ labeled_statement
 compound_statement
 	: '{' '}'
 		{ push_node(AST_BLOCK, @$.start, @$.end, 0); }
-	| '{' statement_list '}'
+	| '{' block_item_list '}'
 		{ push_node(AST_BLOCK, @$.start, @$.end, 1); }
-	| '{' declaration_list '}'
-		{ push_node(AST_BLOCK, @$.start, @$.end, 1); }
-	| '{' declaration_list statement_list '}'
-		{ push_node(AST_BLOCK, @$.start, @$.end, 2); }
 	;
 
-declaration_list
+block_item_list
+	: block_item
+		{ push_node(AST_BLOCKLIST, @$.start, @$.end, 1); }
+	| block_item_list block_item
+		{ push_node(AST_BLOCKLIST, @$.start, @$.end, 2); }
+	;
+
+block_item
 	: declaration
-		{ push_node(AST_DECLLIST, @$.start, @$.end, 1); }
-	| declaration_list declaration
-		{ push_node(AST_DECLLIST, @$.start, @$.end, 2); }
-	;
-
-statement_list
-	: statement
-		{ push_node(AST_STMTLIST, @$.start, @$.end, 1); }
-	| statement_list statement
-		{ push_node(AST_STMTLIST, @$.start, @$.end, 2); }
+	| statement
 	;
 
 expression_statement
@@ -544,6 +619,15 @@ iteration_statement
 		{ push_node(AST_FOR, @$.start, @$.end, 3); }
 	| FOR '(' expr ';' expr ';' expr ')' statement
 		{ push_node(AST_FOR, @$.start, @$.end, 4); }
+
+	| FOR '(' declaration ';' ';' ')' statement
+		{ push_node(AST_FOR, @$.start, @$.end, 2); }
+	| FOR '(' declaration ';' ';' expr ')' statement
+		{ push_node(AST_FOR, @$.start, @$.end, 3); }
+	| FOR '(' declaration ';' expr ';' ')' statement
+		{ push_node(AST_FOR, @$.start, @$.end, 3); }
+	| FOR '(' declaration ';' expr ';' expr ')' statement
+		{ push_node(AST_FOR, @$.start, @$.end, 4); }
 	;
 
 jump_statement
@@ -559,31 +643,31 @@ jump_statement
 		{ push_node(AST_RETURN, @$.start, @$.end, 1); }
 	;
 
-file
-	: external_definition
+translation_unit
+	: external_declaration
 		{ push_node(AST_FILE, @$.start, @$.end, 1); }
-	| file external_definition
+	| translation_unit external_declaration
 		{ push_node(AST_FILE, @$.start, @$.end, 2); }
 	;
 
-external_definition
+external_declaration
 	: function_definition
 	| declaration
 	| macro
 	;
 
 function_definition
-	: declarator function_body
-		{ push_node(AST_FUNCTION, @$.start, @$.end, 2); }
-	| declaration_specifiers declarator function_body
+	: declaration_specifiers declarator compound_statement
 		{ push_node(AST_FUNCTION, @$.start, @$.end, 3); }
+	| declaration_specifiers declarator declaration_list compound_statement
+		{ push_node(AST_FUNCTION, @$.start, @$.end, 4); }
 	;
 
-function_body
-	: compound_statement
-		{ push_node(AST_BODY, @$.start, @$.end, 1); }
-	| declaration_list compound_statement
-		{ push_node(AST_BODY, @$.start, @$.end, 2); }
+declaration_list
+	: declaration
+		{ push_node(AST_DECLLIST, @$.start, @$.end, 1); }
+	| declaration_list declaration
+		{ push_node(AST_DECLLIST, @$.start, @$.end, 2); }
 	;
 
 macro
