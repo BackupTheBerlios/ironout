@@ -112,7 +112,8 @@ struct block *block_find(struct block *block, long offset)
 static int decl_node(struct node *node)
 {
 	switch (node->type) {
-	case AST_DECL2:
+	case AST_BLOCKLIST:
+	case AST_DIRDECL:
 	case AST_DECL:
 	case AST_DECLLIST:
 	case AST_DECLSPEC:
@@ -149,7 +150,7 @@ static void handle_enum(struct block *block, struct node *node)
 
 static void handle_function(struct block *block, struct node *node)
 {
-	struct node *decl = node->children[node->count - 2];
+	struct node *decl = node->children[1];
 	struct node *cur = decl;
 	while (cur->type != AST_IDENTIFIER) {
 		if (!cur->count)
@@ -252,7 +253,7 @@ static int struct_node(struct node *node)
 	if (!node)
 		return 0;
 	switch (node->type) {
-	case AST_DECL2:
+	case AST_DIRDECL:
 	case AST_DECL:
 	case AST_DECLLIST:
 	case AST_DECLSPEC:
