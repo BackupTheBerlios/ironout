@@ -16,9 +16,9 @@ parse.o: parse.h ast.h utils.h
 ast.o: ast.h
 strutils.o: strutils.h
 hash.o: hash.h
-cyacc.c: cyacc.y
+cyacc.c: c.y
 	$(YACC) $(YFLAGS) -o $@ $<
-clex.c: clex.l
+clex.c: c.l
 	$(LEX) $(LFLAGS) -o $@ $<
 .c.o:
 	$(CC) -c $(CFLAGS) $<
