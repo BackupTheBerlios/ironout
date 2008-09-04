@@ -313,18 +313,18 @@ struct_declaration_list
 	;
 
 struct_declaration
-	: type_qualifier_list struct_declarator_list ';'
+	: specifier_qualifier_list struct_declarator_list ';'
 		{ push_node(AST_STRUCTDECL, @$.start, @$.end, 2); }
 	;
 
 specifier_qualifier_list
-	: type_specifier ';'
+	: type_specifier
 		{ push_node(AST_STRUCTQUALLIST, @$.start, @$.end, 1); }
-	| type_specifier specifier_qualifier_list ';'
+	| type_specifier specifier_qualifier_list
 		{ push_node(AST_STRUCTQUALLIST, @$.start, @$.end, 2); }
-	| type_qualifier ';'
+	| type_qualifier
 		{ push_node(AST_STRUCTQUALLIST, @$.start, @$.end, 1); }
-	| type_qualifier specifier_qualifier_list ';'
+	| type_qualifier specifier_qualifier_list
 		{ push_node(AST_STRUCTQUALLIST, @$.start, @$.end, 2); }
 	;
 
@@ -337,6 +337,8 @@ struct_declarator_list
 
 struct_declarator
 	: declarator
+	| ':' constant_expr
+		{ push_node(AST_STRUCTBITS, @$.start, @$.end, 2); }
 	| declarator ':' constant_expr
 		{ push_node(AST_STRUCTBITS, @$.start, @$.end, 2); }
 	;
@@ -415,6 +417,13 @@ direct_declarator
 		{ push_node(AST_DIRDECL, @$.start, @$.end, 2); }
 
 	| direct_declarator '[' type_qualifier_list STATIC assignment_expr ']'
+
+	| direct_declarator '(' ')'
+		{ push_node(AST_DIRDECL, @$.start, @$.end, 1); }
+	| direct_declarator '(' parameter_type_list ')'
+		{ push_node(AST_DIRDECL, @$.start, @$.end, 2); }
+	| direct_declarator '(' identifier_list ')'
+		{ push_node(AST_DIRDECL, @$.start, @$.end, 2); }
 	;
 
 pointer
@@ -454,6 +463,13 @@ parameter_declaration
 		{ push_node(AST_PARAMDECL, @$.start, @$.end, 2); }
 	| declaration_specifiers abstract_declarator
 		{ push_node(AST_PARAMDECL, @$.start, @$.end, 2); }
+	;
+
+identifier_list
+	: identifier
+		{ push_node(AST_IDLIST, @$.start, @$.end, 1); }
+	| identifier_list ',' identifier
+		{ push_node(AST_IDLIST, @$.start, @$.end, 2); }
 	;
 
 type_name
