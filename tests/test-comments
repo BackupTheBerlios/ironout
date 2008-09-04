@@ -1,8 +1,16 @@
-: # test parameters
--------------------
+: # test multi-line comments
+----------------------------
 : write test.c
-/* this is a variable */
+/* this is a comment */
 int var;
-/* end of variable */
-: ironout find test.c 29
-test.c 29 32
+/* end of comment */
+: ironout find test.c 28
+test.c 28 31
+: # test c99 comments
+---------------------
+: write test.c
+// this is a comment
+int var;
+// this is a comment
+: ironout find test.c 25
+test.c 25 28
