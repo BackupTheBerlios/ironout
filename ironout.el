@@ -26,6 +26,9 @@
       (local-set-key (kbd "q") 'delete-window))
     (setq next-error-function 'ironout-goto-next)
     (display-buffer buffer)
+    ;; sometimes the changes are not displayed before switching
+    (switch-to-buffer buffer t)
+    (switch-to-buffer nil)
   ))
 
 (defun ironout-goto-next (arg reset)
