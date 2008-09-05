@@ -7,6 +7,13 @@
 
 #define MAXFILES	128
 
+static int cfile_cmp(void *o1, void *o2)
+{
+	struct cfile *c1 = *(struct cfile **) o1;
+	struct cfile *c2 = *(struct cfile **) o2;
+	return -strcmp(c1->name, c2->name);
+}
+
 struct project *project_init()
 {
 	struct project *project;
@@ -26,6 +33,8 @@ struct project *project_init()
 				project->files[project->count++] = cfile;
 		}
 	}
+	qsort(project->files, project->count,
+	      sizeof(*project->files), cfile_cmp);
 	return project;
 }
 
