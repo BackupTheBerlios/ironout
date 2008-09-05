@@ -165,7 +165,9 @@ static void add_type(char *typename)
 
 int is_typename(char *name)
 {
-	if (!typedefs)
+	if (!typedefs) {
 		add_type("FILE");
+		add_type("size_t");
+	}
 	return hash_get(typedefs, name) != NULL;
 }
