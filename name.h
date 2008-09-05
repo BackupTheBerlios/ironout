@@ -1,6 +1,8 @@
 #ifndef _NAME_H
 #define _NAME_H
 
+#include "ast.h"
+
 #define NAME_VAR	0x0001
 #define NAME_PARAM	0x0002
 #define NAME_FIELD	0x0004
@@ -24,5 +26,7 @@ struct name {
 
 struct name *name_init(char *name, int flags);
 void name_free(struct name *name);
+int modifier_flags(struct node *node);
+int modifiers_match(struct name *name, int flags);
 
 #endif
