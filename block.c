@@ -240,7 +240,7 @@ struct name *block_lookup(struct block *block, struct node *node)
 {
 	struct name *name = name_on(node);
 	struct name *result = NULL;
-	if (node_isfield(node))
+	if (!name || node_isfield(node))
 		return NULL;
 	while (block) {
 		struct name *cur = hash_get(block_names(block), name);
