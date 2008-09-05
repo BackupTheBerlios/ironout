@@ -14,11 +14,11 @@ static int cfile_cmp(void *o1, void *o2)
 	return -strcmp(c1->name, c2->name);
 }
 
-struct project *project_init()
+struct project *project_init(char *root)
 {
 	struct project *project;
 	struct dirent *dirent;
-	DIR *dir = opendir(".");
+	DIR *dir = opendir(root);
 	project = xmalloc(sizeof(*project));
 	project->files = xmalloc(sizeof(*project->files) * MAXFILES);
 	project->count = 0;

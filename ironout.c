@@ -31,7 +31,7 @@ static int getname_cmd(char *filename, long offset)
 
 static int find_cmd(char *filename, long offset)
 {
-	struct project *project = project_init();
+	struct project *project = project_init(".");
 	struct cfile *cfile;
 	struct occurrence *occurrences, *cur;
 	cfile = project_find(project, filename);
