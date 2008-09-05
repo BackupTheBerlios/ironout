@@ -14,7 +14,7 @@
       (setq buffer-read-only 'nil)
       (erase-buffer))
     (call-process ironout-path
-		  nil buffer t
+		  nil '("*ironout-find*" nil) t
 		  "find" (buffer-file-name) (int-to-string
 					     (- (+ (point-min) (point))
 						2)))
