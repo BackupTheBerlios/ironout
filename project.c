@@ -29,7 +29,7 @@ struct project *project_init(char *root)
 			continue;
 		if (endswith(name, ".h") || endswith(name, ".c")) {
 			cfile = cfile_init(name);
-			if (name)
+			if (cfile)
 				project->files[project->count++] = cfile;
 		}
 	}
