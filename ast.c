@@ -52,3 +52,35 @@ int node_cmp(struct node *n1, struct node *n2)
 			return 1;
 	return 0;
 }
+
+static int struct_node(struct node *node)
+{
+	if (!node)
+		return 0;
+	switch (node->type) {
+	case AST_DIRDECL:
+	case AST_DECL:
+	case AST_DECLLIST:
+	case AST_DECLSPEC:
+	case AST_DECLSTMT:
+		return struct_node(node->parent);
+	case AST_STRUCTBITS:
+	case AST_STRUCTDECLLIST:
+		return 1;
+	default:
+		return 0;
+	}
+}
+
+int node_isfield(struct node *node)
+{
+	struct node *cur = node->parent;
+	if (!cur)
+		return 0;
+	if ((cur->type == AST_GETATTR || cur->type == AST_DEREF)
+	    && cur->children[1] == node)
+		return 1;
+	if (struct_node(cur))
+		return 1;
+	return 0;
+}
