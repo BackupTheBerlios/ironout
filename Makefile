@@ -8,7 +8,7 @@ LFLAGS =
 YFLAGS = -d
 
 OBJS = cyacc.o clex.o parse.o ironout.o ast.o strutils.o hash.o utils.o \
-	block.o name.o cfile.o find.o
+	block.o name.o cfile.o find.o project.o
 
 all: ironout
 
