@@ -55,10 +55,17 @@ static struct occurrence *reverse(struct occurrence *o)
 static struct name *find_definition(struct project *project,
 				    struct cfile *cfile, long offset)
 {
+	struct node *node;
+	struct block *block;
+	struct name *name;
 	int i;
-	struct node *node = node_find(cfile->node, offset);
-	struct block *block = block_find(cfile->block, offset);
-	struct name *name = block_lookup(block, node);
+	node = node_find(cfile->node, offset);
+	if (!node)
+		return NULL;
+	block = block_find(cfile->block, offset);
+	if (!block)
+		return NULL;
+	name = block_lookup(block, node);
 	if (name)
 		return name;
 	for (i = 0; i < project->count; i++) {
