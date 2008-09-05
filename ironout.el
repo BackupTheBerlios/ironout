@@ -17,7 +17,7 @@
 		  nil buffer t
 		  "find" (buffer-file-name) (int-to-string
 					     (- (+ (point-min) (point))
-						1)))
+						2)))
     (with-current-buffer buffer
       (goto-char (point-min))
       (setq buffer-read-only 't)
