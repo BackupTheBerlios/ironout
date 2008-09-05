@@ -9,6 +9,7 @@
 
 static struct node *nodestack[1024];
 static int nodecount = 0;
+static int parse_error = 0;
 
 static int list_nodetype(enum nodetype nodetype)
 {
@@ -98,19 +99,31 @@ static void linear_lists(struct node *node)
 		linear_lists(node->children[i]);
 }
 
+static void error_happened()
+{
+	int i;
+	parse_error = 1;
+	for (i = 0; i < nodecount; i++)
+		node_free(nodestack[i]);
+	nodecount = 0;
+}
+
 struct node *parse(char *filename)
 {
 	FILE *file = fopen(filename, "r");
 	if (!file)
 		return NULL;
+	parse_error = 0;
 	yyrestart(file);
 	yyparse();
 	fclose(file);
 	reset_tokenizer();
-	if (nodecount != 1)
+	if (parse_error || nodecount != 1) {
 		fprintf(stderr, "ERROR: %d nodes on the stack\n", nodecount);
-	else
-		linear_lists(nodestack[0]);
+		error_happened();
+		return NULL;
+	}
+	linear_lists(nodestack[0]);
 	return nodestack[--nodecount];
 }
 
@@ -121,7 +134,12 @@ static int str_cmp(void *data, void *key)
 
 struct node *push_node(enum nodetype type, long start, long end, int nchild)
 {
-	struct node *node = xmalloc(sizeof(struct node));
+	struct node *node;
+	if (parse_error || nchild > nodecount) {
+		error_happened();
+		return NULL;
+	}
+	node = xmalloc(sizeof(struct node));
 	memset(node, 0, sizeof(struct node));
 	node->type = type;
 	node->start = start;
@@ -142,10 +160,11 @@ struct node *push_node(enum nodetype type, long start, long end, int nchild)
 
 struct node *push_node_name(enum nodetype type, long start, long end, char *name)
 {
-	char *data = xmalloc(strlen(name) + 1);
 	struct node *node = push_node(type, start, end, 0);
-	strcpy(data, name);
-	node->data = data;
+	if (parse_error || !node)
+		return NULL;
+	node->data = xmalloc(strlen(name) + 1);
+	strcpy(node->data, name);
 	return node;
 }
 

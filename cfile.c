@@ -7,10 +7,14 @@
 
 struct cfile *cfile_init(char *filename)
 {
-	struct cfile *cfile = xmalloc(sizeof(struct cfile));
+	struct cfile *cfile;
+	struct node *node = parse(filename);
+	if (!node)
+		return NULL;
+	cfile = xmalloc(sizeof(struct cfile));
 	cfile->name = xmalloc(strlen(filename) + 1);
 	strcpy(cfile->name, filename);
-	cfile->node = parse(filename);
+	cfile->node = node;
 	cfile->block = block_init(cfile->node);
 	return cfile;
 }
