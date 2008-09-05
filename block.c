@@ -192,7 +192,7 @@ int name_cmp(void *data, void *key)
 	struct name *n1 = data;
 	struct name *n2 = key;
 	if (!strcmp(n1->name, n2->name))
-		return (n1->flags ^ n2->flags) & NAME_MOD_MASK;
+		return !modifiers_match(n1, n2->flags);
 	return 1;
 }
 
@@ -222,21 +222,9 @@ struct hash *block_names(struct block *block)
 
 struct name *name_on(struct node *node)
 {
-	int flags = 0;
 	if (node->type != AST_IDENTIFIER && node->type != AST_TYPENAME)
 		return NULL;
-	if (node->parent) {
-		if (node->parent->type == AST_ENUM)
-			flags |= NAME_ENUM;
-		if (node->parent->type == AST_STRUCT) {
-			enum nodetype type = node->parent->children[0]->type;
-			if (type == AST_STRUCTKW)
-				flags |= NAME_STRUCT;
-			else
-				flags |= NAME_UNION;
-		}
-	}
-	return name_init(node->data, flags);
+	return name_init(node->data, modifier_flags(node));
 }
 
 struct block *block_defining(struct block *block, struct node *node)
@@ -248,43 +236,11 @@ struct block *block_defining(struct block *block, struct node *node)
 	return block;
 }
 
-static int struct_node(struct node *node)
-{
-	if (!node)
-		return 0;
-	switch (node->type) {
-	case AST_DIRDECL:
-	case AST_DECL:
-	case AST_DECLLIST:
-	case AST_DECLSPEC:
-	case AST_DECLSTMT:
-		return struct_node(node->parent);
-	case AST_STRUCTBITS:
-	case AST_STRUCTDECLLIST:
-		return 1;
-	default:
-		return 0;
-	}
-}
-
-static int is_field(struct node *node)
-{
-	struct node *cur = node->parent;
-	if (!cur)
-		return 0;
-	if ((cur->type == AST_GETATTR || cur->type == AST_DEREF)
-	    && cur->children[1] == node)
-		return 1;
-	if (struct_node(cur))
-		return 1;
-	return 0;
-}
-
 struct name *block_lookup(struct block *block, struct node *node)
 {
 	struct name *name = name_on(node);
 	struct name *result = NULL;
-	if (is_field(node))
+	if (node_isfield(node))
 		return NULL;
 	while (block) {
 		struct name *cur = hash_get(block_names(block), name);
