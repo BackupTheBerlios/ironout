@@ -1,14 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "ast.h"
 #include "block.h"
 #include "cfile.h"
 #include "find.h"
 #include "hash.h"
 #include "name.h"
+#include "path.h"
 #include "project.h"
 
+#define MAXPATHLEN	1024
 
 static int parse_cmd(char *filename)
 {
@@ -29,11 +32,17 @@ static int getname_cmd(char *filename, long offset)
 	return 0;
 }
 
-static int find_cmd(char *filename, long offset)
+static int find_cmd(char *path, long offset)
 {
-	struct project *project = project_init(".");
+	char dir[MAXPATHLEN];
+	char filename[MAXPATHLEN];
+	struct project *project;
 	struct cfile *cfile;
 	struct occurrence *occurrences, *cur;
+	dirname(dir, path);
+	basename(filename, path);
+	chdir(dir);
+	project = project_init(".");
 	cfile = project_find(project, filename);
 	if (!cfile)
 		return 1;
