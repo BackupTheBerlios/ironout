@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include "find.h"
 #include "utils.h"
 
@@ -10,12 +11,21 @@ struct finddata {
 	struct occurrence *occurrence;
 };
 
-static int checknode(struct node *node, void *data)
+static int extern_node_matches(struct name *name, struct node *node)
+{
+	if (!modifiers_match(name, modifier_flags(node)))
+		return 0;
+	return !strcmp(name->name, node->data) && !node_isfield(node);
+}
+
+static int does_match(struct node *node, void *data)
 {
 	struct finddata *finddata = data;
 	if (node->type == AST_IDENTIFIER || node->type == AST_TYPENAME) {
 		struct block *block = block_find(finddata->block, node->start);
-		if (block_lookup(block, node) == finddata->name) {
+		struct name *name = block_lookup(block, node);
+		if ((!name && extern_node_matches(finddata->name, node)) ||
+		    name == finddata->name) {
 			struct occurrence *occurrence =
 				xmalloc(sizeof(struct occurrence));
 			occurrence->start = node->start;
@@ -42,22 +52,40 @@ static struct occurrence *reverse(struct occurrence *o)
 	return newhead;
 }
 
-struct occurrence *find_at(struct cfile *cfile, long offset)
+static struct name *find_definition(struct project *project,
+				    struct cfile *cfile, long offset)
 {
+	int i;
 	struct node *node = node_find(cfile->node, offset);
 	struct block *block = block_find(cfile->block, offset);
 	struct name *name = block_lookup(block, node);
+	if (name)
+		return name;
+	for (i = 0; i < project->count; i++) {
+		struct cfile *cfile = project->files[i];
+		name = block_lookup(cfile->block, node);
+		if (name)
+			return name;
+	}
+	return NULL;
+}
+
+struct occurrence *find_at(struct project *project,
+			   struct cfile *cfile, long offset)
+{
+	struct name *name = find_definition(project, cfile, offset);
 	if (name) {
-		struct block *defblock = block_defining(block, node);
-		if (defblock) {
-			struct finddata finddata;
-			finddata.block = defblock;
-			finddata.name = name;
-			finddata.cfile = cfile;
-			finddata.occurrence = NULL;
-			node_walk(cfile->node, checknode, &finddata);
-			return reverse(finddata.occurrence);
+		struct finddata finddata;
+		int i;
+		finddata.occurrence = NULL;
+		finddata.name = name;
+		for (i = project->count - 1; i >= 0; --i) {
+			struct cfile *cur = project->files[i];
+			finddata.block = cur->block;
+			finddata.cfile = cur;
+			node_walk(cur->node, does_match, &finddata);
 		}
+		return reverse(finddata.occurrence);
 	}
 	return NULL;
 }

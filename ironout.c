@@ -7,6 +7,7 @@
 #include "find.h"
 #include "hash.h"
 #include "name.h"
+#include "project.h"
 
 
 static int parse_cmd(char *filename)
@@ -30,8 +31,9 @@ static int getname_cmd(char *filename, long offset)
 
 static int find_cmd(char *filename, long offset)
 {
-	struct cfile *cfile = cfile_init(filename);
-	struct occurrence *occurrences = find_at(cfile, offset);
+	struct project *project = project_init();
+	struct cfile *cfile = project_find(project, filename);
+	struct occurrence *occurrences = find_at(project, cfile, offset);
 	struct occurrence *cur = occurrences;
 	while (cur) {
 		printf("%s %ld %ld\n", cur->cfile->name, cur->start, cur->end);
