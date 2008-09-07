@@ -1,0 +1,27 @@
+: # two separate files
+----------------------
+: write test1.c
+int var;
+: write test2.c
+int var;
+: ironout find test1.c 4
+test1.c 4 7
+: ironout find test2.c 4
+test2.c 4 7
+: # using extern
+----------------
+: write test1.c
+void f()
+{
+}
+: write test2.c
+void g()
+{
+	f();
+}
+: ironout find test1.c 5
+test1.c 5 6
+test2.c 12 13
+: ironout find test2.c 12
+test1.c 5 6
+test2.c 12 13
