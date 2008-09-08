@@ -16,9 +16,9 @@
       (setq buffer-read-only 'nil)
       (erase-buffer))
     (let ((offset (int-to-string (- (+ (point-min) (point)) 2))))
-      (call-process ironout-path nil buffer t
+      (call-process ironout-path nil '("*ironout-patch*" nil) t
 		    "rename" filename offset newname))
-    (switch-to-buffer-other-window buffer)
+    (switch-to-buffer buffer)
     (goto-char (point-min))
     (diff-mode)
     (setq buffer-read-only 't)
@@ -31,11 +31,9 @@
     (with-current-buffer buffer
       (setq buffer-read-only 'nil)
       (erase-buffer))
-    (call-process ironout-path
-		  nil '("*ironout-find*" nil) t
-		  "find" (buffer-file-name) (int-to-string
-					     (- (+ (point-min) (point))
-						2)))
+    (let ((offset (int-to-string (- (+ (point-min) (point)) 2))))
+      (call-process ironout-path nil '("*ironout-find*" nil) t
+		    "find" (buffer-file-name) offset))
     (with-current-buffer buffer
       (goto-char (point-min))
       (setq buffer-read-only 't)
