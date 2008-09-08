@@ -1,0 +1,11 @@
+: # simple rename
+-----------------
+: write test.c
+int var;
+: ironout rename test.c 4 newvar
+diff --git a/test.c b/test.c
+--- a/test.c
++++ b/test.c
+@@ -1 +1 @@
+-int var;
++int newvar;

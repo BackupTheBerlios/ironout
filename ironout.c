@@ -53,7 +53,29 @@ static int find_cmd(char *path, long offset)
 		cur = cur->next;
 	}
 	free_occurrences(occurrences);
-	cfile_free(cfile);
+	project_free(project);
+	return 0;
+}
+
+static int rename_cmd(char *path, long offset, char *newname)
+{
+	char dir[MAXPATHLEN];
+	char filename[MAXPATHLEN];
+	struct project *project;
+	struct cfile *cfile;
+	struct occurrence *occurrences;
+	dirname(dir, path);
+	basename(filename, path);
+	chdir(dir);
+	project = project_init(".");
+	cfile = project_find(project, filename);
+	if (!cfile)
+		return 1;
+	occurrences = find_at(project, cfile, offset);
+	rename(occurrences, newname);
+
+	free_occurrences(occurrences);
+	project_free(project);
 	return 0;
 }
 
@@ -66,6 +88,8 @@ int main(int argc, char **argv)
 			return getname_cmd(argv[2], atoi(argv[3]));
 		if (!strcmp(argv[1], "find") && argc > 3)
 			return find_cmd(argv[2], atoi(argv[3]));
+		if (!strcmp(argv[1], "rename") && argc > 4)
+			return rename_cmd(argv[2], atoi(argv[3]), argv[4]);
 	}
 	printf("Usage: %s COMMAND [ARGS]\n", argv[0]);
 	return 1;
