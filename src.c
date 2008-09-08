@@ -75,7 +75,7 @@ struct src *src_copy(struct src *src)
 		result->lines[i] = xmalloc(strlen(src->lines[i]) + 1);
 		strcpy(result->lines[i], src->lines[i]);
 	}
-	src->invalid_from = 0;
+	result->invalid_from = 0;
 	return result;
 }
 
