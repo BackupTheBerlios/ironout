@@ -118,3 +118,13 @@ test.c 36 37
 : ironout find test.c 45
 test.c 5 6
 test.c 45 46
+: # test variable usage when initializing
+-----------------------------------------
+: write test.c
+int var;
+int f() {
+	int i = var;
+}
+: ironout find test.c 4
+test.c 4 7
+test.c 28 31

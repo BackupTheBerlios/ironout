@@ -119,7 +119,6 @@ static int decl_node(struct node *node)
 	case AST_DECLSPEC:
 	case AST_DECLSTMT:
 	case AST_FILE:
-	case AST_INIT:
 	case AST_INITLIST:
 	case AST_TYPE:
 	case AST_PARAMDECL:
@@ -179,6 +178,8 @@ static int find_names(struct node *node, void *data)
 		}
 	if (node->type == AST_FUNCTION)
 		handle_function(block, node);
+	if (node->type == AST_INIT)
+		node_walk(node->children[0], find_names, block);
 	return block->node == node || decl_node(node);
 }
 
