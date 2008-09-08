@@ -6,6 +6,24 @@
 (defcustom ironout-path "ironout"
   "The path to ironout executable.")
 
+(defun ironout-rename ()
+  "Rename occurrences of a name."
+  (interactive)
+  (let ((buffer (get-buffer-create "*ironout-patch*"))
+	(newname (read-string "New Name: "))
+	(filename (buffer-file-name)))
+    (with-current-buffer buffer
+      (setq buffer-read-only 'nil)
+      (erase-buffer))
+    (let ((offset (int-to-string (- (+ (point-min) (point)) 2))))
+      (call-process ironout-path nil buffer t
+		    "rename" filename offset newname))
+    (switch-to-buffer-other-window buffer)
+    (goto-char (point-min))
+    (diff-mode)
+    (setq buffer-read-only 't)
+  ))
+
 (defun ironout-find ()
   "Find occurrences of a name."
   (interactive)
@@ -61,6 +79,7 @@
  "ironout, a C refactoring tool!" nil " Iron" ironout-local-keymap
   :global nil)
 
-(define-key ironout-local-keymap (kbd "C-c f") 'ironout-find)
+(define-key ironout-local-keymap (kbd "C-c i f") 'ironout-find)
+(define-key ironout-local-keymap (kbd "C-c i r") 'ironout-rename)
 (add-hook 'c-mode-hook 'ironout-mode)
 (provide 'ironout)
