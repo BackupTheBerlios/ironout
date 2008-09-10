@@ -109,26 +109,6 @@ struct block *block_find(struct block *block, long offset)
 	return result.result;
 }
 
-static int decl_node(struct node *node)
-{
-	switch (node->type) {
-	case AST_BLOCKLIST:
-	case AST_DIRDECL:
-	case AST_DECL:
-	case AST_DECLLIST:
-	case AST_DECLSPEC:
-	case AST_DECLSTMT:
-	case AST_FILE:
-	case AST_INITLIST:
-	case AST_TYPE:
-	case AST_PARAMDECL:
-	case AST_PARAMLIST:
-		return 1;
-	default:
-		return 0;
-	}
-}
-
 static void handle_enum(struct block *block, struct node *node)
 {
 	int i;
@@ -147,48 +127,110 @@ static void handle_enum(struct block *block, struct node *node)
 	}
 }
 
-static void handle_function(struct block *block, struct node *node)
+static char *get_declarator_name(struct node *node)
 {
-	struct node *decl = node->children[1];
-	struct node *cur = decl;
-	while (cur->type != AST_IDENTIFIER) {
-		if (!cur->count)
-			return;
+	struct node *cur = node;
+	while (cur->count)
 		if (cur->type == AST_PTR)
 			cur = cur->children[cur->count - 1];
 		else
 			cur = cur->children[0];
+	if (cur->type == AST_IDENTIFIER)
+		return cur->data;
+	return NULL;
+}
+
+static void handle_function(struct block *block, struct node *node)
+{
+	char *name = get_declarator_name(node->children[1]);
+	if (name)
+		hash_put(block_names(block),
+			 name_init(name, NAME_FUNCTION));
+}
+
+static void handle_struct(struct block *block, struct node *node)
+{
+	if (node->count < 3)
+		return;
+	if (node->children[1]->type == AST_IDENTIFIER) {
+		int flags = node->children[0]->type == AST_STRUCTKW ?
+			NAME_STRUCT : NAME_UNION;
+		hash_put(block_names(block),
+			 name_init(node->children[1]->data, flags));
 	}
-	hash_put(block_names(block), name_init(cur->data, NAME_FUNCTION));
+}
+
+static int search_declarators(struct node *node, void *data)
+{
+	struct block *block = data;
+	if (node->type == AST_INIT || node->type == AST_DECL) {
+		struct node *decl = node->type == AST_INIT ?
+			node->children[0] : node;
+		char *name = get_declarator_name(decl);
+		if (name)
+			hash_put(block_names(block), name_init(name, 0));
+		return 0;
+	}
+	return 1;
+}
+
+static int search_enums_and_structs(struct node *node, void *data)
+{
+	struct block *block = data;
+	if (node->type == AST_ENUM)
+		handle_enum(block, node);
+	if (node->type == AST_STRUCT)
+		handle_struct(block, node);
+	return 1;
+}
+
+static void handle_declaration(struct block *block, struct node *node)
+{
+	node_walk(node->children[0], search_enums_and_structs, block);
+	if (node->count > 1)
+		node_walk(node->children[1], search_declarators, block);
+}
+
+static void handle_parameters(struct block *block, struct node *node)
+{
+	int i;
+	for (i = 0; i < node->count; i++) {
+		struct node *param = node->children[i];
+		if (param->count > 1) {
+			char *name = get_declarator_name(
+				param->children[param->count - 1]);
+			if (name)
+				hash_put(block_names(block),
+					 name_init(name, 0));
+		}
+	}
 }
 
 static int find_names(struct node *node, void *data)
 {
 	struct block *block = data;
-	if (node->type == AST_IDENTIFIER)
-		hash_put(block_names(block), name_init(node->data, 0));
-	if (node->type == AST_ENUM)
-		handle_enum(block, node);
-	if (node->type == AST_STRUCT && node->count >= 3)
-		if (node->children[1]->type == AST_IDENTIFIER) {
-			int flags = node->children[0]->type == AST_STRUCTKW ?
-				NAME_STRUCT : NAME_UNION;
-			hash_put(block_names(block),
-				 name_init(node->children[1]->data, flags));
-		}
-	if (node->type == AST_FUNCTION)
+	switch (node->type) {
+	case AST_FUNCTION:
 		handle_function(block, node);
-	if (node->type == AST_INIT)
-		node_walk(node->children[0], find_names, block);
-	return block->node == node || decl_node(node);
+		break;
+	case AST_DECLSTMT:
+		handle_declaration(block, node);
+		break;
+	case AST_BLOCKLIST:
+	case AST_DECLLIST:
+		return 1;
+	default:
+		break;
+	}
+	return block->node == node;
 }
 
-long name_hash(void *name)
+static long name_hash(void *name)
 {
 	return str_hash(((struct name *) name)->name);
 }
 
-int name_cmp(void *data, void *key)
+static int name_cmp(void *data, void *key)
 {
 	struct name *n1 = data;
 	struct name *n2 = key;
@@ -207,7 +249,14 @@ static void init_names(struct block *block)
 		struct node *decl2 = decl->children[decl->count - 1];
 		if (decl2->count > 1) {
 			struct node *params = decl2->children[decl2->count - 1];
-			node_walk(params, find_names, block);
+			handle_parameters(block, params);
+		}
+		if (node->count >= 4) {
+			int i;
+			struct node *decllist = node->children[node->count - 2];
+			for (i = 0; i < decllist->count; i++)
+				handle_declaration(block,
+						   decllist->children[i]);
 		}
 	} else {
 		node_walk(block->node, find_names, block);
