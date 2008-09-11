@@ -26,3 +26,19 @@ extern int var = 1;
 test1.c 11 14
 test1.c 28 31
 test2.c 11 14
+: # function declarations
+-------------------------
+: write test1.c
+void f();
+void g()
+{
+	f();
+}
+: write test2.c
+void f()
+{
+}
+: ironout find test1.c 5
+test1.c 5 6
+test1.c 22 23
+test2.c 5 6

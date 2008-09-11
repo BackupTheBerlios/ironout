@@ -166,18 +166,34 @@ struct declinfo {
 	unsigned isextern : 1;
 };
 
+static void add_declarator_name(struct block *block, struct node *decl)
+{
+	char *name;
+	struct node *dirdecl = decl->children[decl->count - 1];
+	/* nothing to do for function declarations */
+	switch (*(enum decltype *) dirdecl->data) {
+	case DECL_PARENS:
+	case DECL_PARENS_TYPE:
+	case DECL_PARENS_ID:
+		return;
+	default:
+		break;
+	}
+	name = get_declarator_name(decl);
+	if (name)
+		hash_put(block_names(block), name_init(name, 0));
+}
+
 static int search_declarators(struct node *node, void *data)
 {
 	struct declinfo *declinfo = data;
+	if (node->type == AST_INIT) {
+		add_declarator_name(declinfo->block, node->children[0]);
+		return 0;
+	}
 	/* should ignore "extern int var" but not "extern int var = 1" */
-	if (node->type == AST_INIT ||
-	    (!declinfo->isextern && node->type == AST_DECL)) {
-		struct node *decl = node->type == AST_INIT ?
-			node->children[0] : node;
-		char *name = get_declarator_name(decl);
-		if (name)
-			hash_put(block_names(declinfo->block),
-				 name_init(name, 0));
+	if (!declinfo->isextern && node->type == AST_DECL) {
+		add_declarator_name(declinfo->block, node);
 		return 0;
 	}
 	return 1;
