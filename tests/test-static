@@ -1,0 +1,13 @@
+: # test extern variable
+------------------------
+: write test1.c
+int var;
+: write test2.c
+extern int var;
+: write test3.c
+static int var;
+: ironout find test1.c 4
+test1.c 4 7
+test2.c 11 14
+: ironout find test3.c 11
+test3.c 11 14
