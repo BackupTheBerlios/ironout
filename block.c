@@ -140,14 +140,6 @@ static char *get_declarator_name(struct node *node)
 	return NULL;
 }
 
-static void handle_function(struct block *block, struct node *node)
-{
-	char *name = get_declarator_name(node->children[1]);
-	if (name)
-		hash_put(block_names(block),
-			 name_init(name, NAME_FUNCTION));
-}
-
 static void handle_struct(struct block *block, struct node *node)
 {
 	if (node->count < 3)
@@ -165,39 +157,6 @@ struct declinfo {
 	unsigned isstatic : 1;
 	unsigned isextern : 1;
 };
-
-static void add_declarator_name(struct block *block, struct node *decl)
-{
-	char *name;
-	struct node *dirdecl = decl->children[decl->count - 1];
-	/* nothing to do for function declarations */
-	switch (*(enum decltype *) dirdecl->data) {
-	case DECL_PARENS:
-	case DECL_PARENS_TYPE:
-	case DECL_PARENS_ID:
-		return;
-	default:
-		break;
-	}
-	name = get_declarator_name(decl);
-	if (name)
-		hash_put(block_names(block), name_init(name, 0));
-}
-
-static int search_declarators(struct node *node, void *data)
-{
-	struct declinfo *declinfo = data;
-	if (node->type == AST_INIT) {
-		add_declarator_name(declinfo->block, node->children[0]);
-		return 0;
-	}
-	/* should ignore "extern int var" but not "extern int var = 1" */
-	if (!declinfo->isextern && node->type == AST_DECL) {
-		add_declarator_name(declinfo->block, node);
-		return 0;
-	}
-	return 1;
-}
 
 static int analyze_declspec(struct node *node, void *data)
 {
@@ -218,6 +177,64 @@ static int analyze_declspec(struct node *node, void *data)
 	default:
 		return 1;
 	}
+}
+
+static int declinfo_flags(struct declinfo *declinfo)
+{
+	int flags = 0;
+	if (declinfo->isstatic)
+		flags |= NAME_STATIC;
+	if (declinfo->isextern)
+		flags |= NAME_EXTERN;
+	return flags;
+}
+
+static void handle_function(struct block *block, struct node *node)
+{
+	char *name;
+	struct declinfo declinfo;
+	memset(&declinfo, 0, sizeof(declinfo));
+	node_walk(node->children[0], analyze_declspec, &declinfo);
+	name = get_declarator_name(node->children[1]);
+	if (name) {
+		int flags = declinfo_flags(&declinfo) | NAME_FUNCTION;
+		hash_put(block_names(block), name_init(name, flags));
+	}
+}
+
+static void add_declarator_name(struct declinfo *declinfo, struct node *decl)
+{
+	char *name;
+	struct block *block = declinfo->block;
+	struct node *dirdecl = decl->children[decl->count - 1];
+	/* nothing to do for function declarations */
+	switch (*(enum decltype *) dirdecl->data) {
+	case DECL_PARENS:
+	case DECL_PARENS_TYPE:
+	case DECL_PARENS_ID:
+		return;
+	default:
+		break;
+	}
+	name = get_declarator_name(decl);
+	if (name)
+		hash_put(block_names(block),
+			 name_init(name, declinfo_flags(declinfo)));
+}
+
+static int search_declarators(struct node *node, void *data)
+{
+	struct declinfo *declinfo = data;
+	if (node->type == AST_INIT) {
+		add_declarator_name(declinfo, node->children[0]);
+		return 0;
+	}
+	/* should ignore "extern int var" but not "extern int var = 1" */
+	if (!declinfo->isextern && node->type == AST_DECL) {
+		add_declarator_name(declinfo, node);
+		return 0;
+	}
+	return 1;
 }
 
 static void handle_declaration(struct block *block, struct node *node)
