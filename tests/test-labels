@@ -1,0 +1,13 @@
+: write test.c
+int f()
+{
+	int lab;
+	goto lab;
+lab:
+	return 0;
+}
+: ironout find test.c 15
+test.c 15 18
+: ironout find test.c 26
+test.c 26 29
+test.c 31 34
