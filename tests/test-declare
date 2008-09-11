@@ -1,0 +1,28 @@
+: # test extern variable
+------------------------
+: write test1.c
+extern int var;
+void g()
+{
+	var = 2;
+}
+: write test2.c
+int var = 1;
+: ironout find test1.c 11
+test1.c 11 14
+test1.c 28 31
+test2.c 4 7
+: # test extern keyword when defining
+-------------------------------------
+: write test1.c
+extern int var;
+void g()
+{
+	var = 2;
+}
+: write test2.c
+extern int var = 1;
+: ironout find test1.c 11
+test1.c 11 14
+test1.c 28 31
+test2.c 11 14
