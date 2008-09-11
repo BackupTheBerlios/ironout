@@ -187,7 +187,7 @@ static void mktempdir(char *path)
 	mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR);
 }
 
-static void rmtempdir(char *path)
+static void rmtempdir(char *path, int rm_dir)
 {
 	struct dirent *ent;
 	DIR *dir = opendir(path);
@@ -197,12 +197,13 @@ static void rmtempdir(char *path)
 			continue;
 		sprintf(child, "%s/%s", path, ent->d_name);
 		if (ent->d_type == DT_DIR)
-			rmtempdir(child);
+			rmtempdir(child, 1);
 		else
 			unlink(child);
 	}
 	closedir(dir);
-	rmdir(path);
+	if (rm_dir)
+		rmdir(path);
 }
 
 int runtests(char *dirname, char *ironout)
@@ -218,6 +219,7 @@ int runtests(char *dirname, char *ironout)
 	}
 	while ((ent = readdir(dir))) {
 		char *name = ent->d_name;
+		rmtempdir(".", 0);
 		if (startswith(name, "test-") && !endswith(name, "~")) {
 			char path[MAXPATHLEN];
 			sprintf(path, "%s/%s", dirname, name);
@@ -265,6 +267,6 @@ int main(int argc, char **argv)
 	result = runtests(testdir, ironout);
 
 	chdir(origin);
-	rmtempdir(TEMPDIR);
+	rmtempdir(TEMPDIR, 1);
 	return result;
 }
