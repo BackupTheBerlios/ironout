@@ -13,6 +13,7 @@
 #define NAME_ENUM	0x0100
 #define NAME_STRUCT	0x0200
 #define NAME_UNION	0x0400
+#define NAME_LABEL	0x0800
 
 #define NAME_STATIC	0x1000
 #define NAME_EXTERN	0x2000

@@ -29,6 +29,9 @@ int modifier_flags(struct node *node)
 			else
 				flags |= NAME_UNION;
 		}
+		if (parent->type == AST_LABELED ||
+		    parent->type == AST_GOTO)
+			flags |= NAME_LABEL;
 	}
 	return flags;
 }

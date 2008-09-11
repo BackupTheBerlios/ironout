@@ -262,6 +262,12 @@ static void handle_parameters(struct block *block, struct node *node)
 	}
 }
 
+static void handle_label(struct block *block, struct node *node)
+{
+	struct node *id = node->children[0];
+	hash_put(block_names(block), name_init(id->data, NAME_LABEL));
+}
+
 static int find_names(struct node *node, void *data)
 {
 	struct block *block = data;
@@ -272,6 +278,9 @@ static int find_names(struct node *node, void *data)
 	case AST_DECLSTMT:
 		handle_declaration(block, node);
 		break;
+	case AST_LABELED:
+		handle_label(block, node);
+		return 1;
 	case AST_BLOCKLIST:
 	case AST_DECLLIST:
 		return 1;
