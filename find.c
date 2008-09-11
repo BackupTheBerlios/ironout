@@ -13,7 +13,8 @@ struct finddata {
 
 static int extern_node_matches(struct name *name, struct node *node)
 {
-	if (!modifiers_match(name, modifier_flags(node)))
+	if (!modifiers_match(name, modifier_flags(node)) ||
+	    name->flags & NAME_STATIC)
 		return 0;
 	return !strcmp(name->name, node->data) && !node_isfield(node);
 }
@@ -71,7 +72,7 @@ static struct name *find_definition(struct project *project,
 	for (i = 0; i < project->count; i++) {
 		struct cfile *cfile = project->files[i];
 		name = block_lookup(cfile->block, node);
-		if (name)
+		if (name && !(name->flags & NAME_STATIC))
 			return name;
 	}
 	return NULL;
