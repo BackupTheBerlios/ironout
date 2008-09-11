@@ -31,6 +31,8 @@ void reset_tokenizer();
 
 struct node *push_node(enum nodetype type, long start, long end, int nchild);
 struct node *push_node_name(enum nodetype type, long start, long end, char *name);
+struct node *push_decl(enum nodetype type, long start, long end,
+		       int nchild, enum decltype decltype);
 
 int is_typename(char *name);
 

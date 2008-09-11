@@ -393,37 +393,38 @@ declarator
 
 direct_declarator
 	: identifier
-		{ push_node(AST_DIRDECL, @$.start, @$.end, 1); }
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 1, DECL_ID); }
 	| '(' declarator ')'
-		{ push_node(AST_DIRDECL, @$.start, @$.end, 1); }
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 1, DECL_INPARENS); }
 
 	| direct_declarator '[' ']'
-		{ push_node(AST_DIRDECL, @$.start, @$.end, 1); }
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 1, DECL_BRACS); }
 	| direct_declarator '[' type_qualifier_list ']'
-		{ push_node(AST_DIRDECL, @$.start, @$.end, 2); }
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 2, DECL_BRACS_TYPE); }
 	| direct_declarator '[' assignment_expr ']'
-		{ push_node(AST_DIRDECL, @$.start, @$.end, 2); }
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 2, DECL_BRACS_ASSIGN); }
 	| direct_declarator '[' type_qualifier_list assignment_expr ']'
-		{ push_node(AST_DIRDECL, @$.start, @$.end, 3); }
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 3, DECL_BRACS_BOTH); }
 
 	| direct_declarator '[' STATIC assignment_expr ']'
-		{ push_node(AST_DIRDECL, @$.start, @$.end, 2); }
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 2, DECL_BRACS_STATIC_ASSIGN); }
 	| direct_declarator '[' STATIC type_qualifier_list assignment_expr ']'
-		{ push_node(AST_DIRDECL, @$.start, @$.end, 3); }
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 3, DECL_BRACS_STATIC_BOTH); }
 
 	| direct_declarator '[' '*' ']'
-		{ push_node(AST_DIRDECL, @$.start, @$.end, 1); }
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 1, DECL_BRACS_STAR); }
 	| direct_declarator '[' type_qualifier_list '*' ']'
-		{ push_node(AST_DIRDECL, @$.start, @$.end, 2); }
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 2, DECL_BRACS_TYPE_STAR); }
 
 	| direct_declarator '[' type_qualifier_list STATIC assignment_expr ']'
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 3, DECL_BRACS_BOTH_STATIC); }
 
 	| direct_declarator '(' ')'
-		{ push_node(AST_DIRDECL, @$.start, @$.end, 1); }
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 1, DECL_PARENS); }
 	| direct_declarator '(' parameter_type_list ')'
-		{ push_node(AST_DIRDECL, @$.start, @$.end, 2); }
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 2, DECL_PARENS_TYPE); }
 	| direct_declarator '(' identifier_list ')'
-		{ push_node(AST_DIRDECL, @$.start, @$.end, 2); }
+		{ push_decl(AST_DIRDECL, @$.start, @$.end, 2, DECL_PARENS_ID); }
 	;
 
 pointer

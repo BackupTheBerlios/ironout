@@ -168,6 +168,17 @@ struct node *push_node_name(enum nodetype type, long start, long end, char *name
 	return node;
 }
 
+struct node *push_decl(enum nodetype type, long start, long end,
+			    int nchild, enum decltype decltype)
+{
+	struct node *node = push_node(type, start, end, nchild);
+	if (parse_error || !node)
+		return NULL;
+	node->data = xmalloc(sizeof(decltype));
+	*(enum decltype *) node->data = decltype;
+	return node;
+}
+
 void node_free(struct node *node)
 {
 	node_free_base(node, 1);
