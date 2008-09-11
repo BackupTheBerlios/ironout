@@ -1,3 +1,9 @@
+/*
+ * ironout  - A C refactoring tool
+ *
+ * Copyright (C) 2008 Ali Gholami Rudi
+ *
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
