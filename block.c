@@ -160,35 +160,58 @@ static void handle_struct(struct block *block, struct node *node)
 	}
 }
 
+struct declinfo {
+	struct block *block;
+	unsigned isstatic : 1;
+	unsigned isextern : 1;
+};
+
 static int search_declarators(struct node *node, void *data)
 {
-	struct block *block = data;
-	if (node->type == AST_INIT || node->type == AST_DECL) {
+	struct declinfo *declinfo = data;
+	/* should ignore "extern int var" but not "extern int var = 1" */
+	if (node->type == AST_INIT ||
+	    (!declinfo->isextern && node->type == AST_DECL)) {
 		struct node *decl = node->type == AST_INIT ?
 			node->children[0] : node;
 		char *name = get_declarator_name(decl);
 		if (name)
-			hash_put(block_names(block), name_init(name, 0));
+			hash_put(block_names(declinfo->block),
+				 name_init(name, 0));
 		return 0;
 	}
 	return 1;
 }
 
-static int search_enums_and_structs(struct node *node, void *data)
+static int analyze_declspec(struct node *node, void *data)
 {
-	struct block *block = data;
-	if (node->type == AST_ENUM)
-		handle_enum(block, node);
-	if (node->type == AST_STRUCT)
-		handle_struct(block, node);
-	return 1;
+	struct declinfo *declinfo = data;
+	switch (node->type) {
+	case AST_ENUM:
+		handle_enum(declinfo->block, node);
+		return 0;
+	case AST_STRUCT:
+		handle_struct(declinfo->block, node);
+		return 0;
+	case AST_STATICKW:
+		declinfo->isstatic = 1;
+		return 0;
+	case AST_EXTERNKW:
+		declinfo->isextern = 1;
+		return 0;
+	default:
+		return 1;
+	}
 }
 
 static void handle_declaration(struct block *block, struct node *node)
 {
-	node_walk(node->children[0], search_enums_and_structs, block);
+	struct declinfo declinfo;
+	memset(&declinfo, 0, sizeof(declinfo));
+	declinfo.block = block;
+	node_walk(node->children[0], analyze_declspec, &declinfo);
 	if (node->count > 1)
-		node_walk(node->children[1], search_declarators, block);
+		node_walk(node->children[1], search_declarators, &declinfo);
 }
 
 static void handle_parameters(struct block *block, struct node *node)
