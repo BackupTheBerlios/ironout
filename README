@@ -7,17 +7,56 @@ Ironout_ is a C refactoring tool.
 .. _ironout: http://ironout.berlios.de
 
 
-Hacking
+HACKING
 =======
 
 Send patches, bug reports and feature requests to `ironout (at)
-googlegroups.com`_.  Also ironout's git repository is located at
+googlegroups.com`_.  Send a mail to ``ironout-subscribe (at)
+googlegroups.com`` to subscribe.
+
+Also ironout's git repository is located at
 git://git.berlios.de/ironout.
 
 .. _`ironout (at) googlegroups.com`: http://groups.google.com/group/ironout
 
 
-License
+TESTING
+=======
+
+Ironout tests are located in ``tests`` folder.  Running ``make test`` will
+build ``tests/runtests``.  It can be used like::
+
+  $ tests/runtests tests
+
+``runtests`` takes the directory which contains test files.  The name
+of each test file starts with ``test-``.
+
+The format of this file is like::
+
+  [SEP] COMMAND ARGS
+  COMMAND_BLOCK
+  [SEP] NEXT_COMMAND ARGS
+  COMMAND_BLOCK
+  ...
+
+Where ``SEP`` is a string that does not contain spaces; it is used to
+find where commands start and end.  ``COMMAND`` shows what to do; they
+are listed in the following table:
+
+=========  ======  =================================================
+Command    Short   Description
+=========  ======  =================================================
+write      >       Write the following block to file
+read       <       Read file and check if its contents matches
+                   the following block
+ironout            Execute ironout with the given arguments and make
+                   sure the output matches the following block
+comment    #       Ignore arguments and the following block
+=========  ======  =================================================
+
+For examples, see test files in ``tests`` directory.
+
+LICENSE
 =======
 
 This program is under the terms of GNU GPL.  Have a look at COPYING
