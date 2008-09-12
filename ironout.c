@@ -21,18 +21,32 @@
 
 #define MAXPATHLEN	1024
 
-static int parse_cmd(char *filename)
+static void require_args(int argc, char **argv, int required)
 {
-	struct cfile *cfile = cfile_init(filename);
+	if (argc < required + 1) {
+		fprintf(stderr, "%s command requires at least %d arguments\n",
+			argv[0], required);
+		exit(1);
+	}
+}
+
+static int parse_cmd(int argc, char **argv)
+{
+	struct cfile *cfile;
+	require_args(argc, argv, 1);
+	cfile = cfile_init(argv[1]);
 	if (cfile)
 		cfile_free(cfile);
 	return !!cfile;
 }
 
-static int getname_cmd(char *filename, long offset)
+static int getname_cmd(int argc, char **argv)
 {
-	struct cfile *cfile = cfile_init(filename);
-	struct node *found = node_find(cfile->node, offset);
+	struct cfile *cfile;
+	struct node *found;
+	require_args(argc, argv, 2);
+	cfile = cfile_init(argv[1]);
+	found = node_find(cfile->node, atoi(argv[2]));
 	if (found && (found->type == AST_IDENTIFIER ||
 		      found->type == AST_TYPENAME))
 		puts(found->data);
@@ -40,21 +54,22 @@ static int getname_cmd(char *filename, long offset)
 	return 0;
 }
 
-static int find_cmd(char *path, long offset)
+static int find_cmd(int argc, char **argv)
 {
 	char dir[MAXPATHLEN];
 	char filename[MAXPATHLEN];
 	struct project *project;
 	struct cfile *cfile;
 	struct occurrence *occurrences, *cur;
-	dirname(dir, path);
-	basename(filename, path);
+	require_args(argc, argv, 2);
+	dirname(dir, argv[1]);
+	basename(filename, argv[1]);
 	chdir(dir);
 	project = project_init(".");
 	cfile = project_find(project, filename);
 	if (!cfile)
 		return 1;
-	occurrences = find_at(project, cfile, offset);
+	occurrences = find_at(project, cfile, atoi(argv[2]));
 	cur = occurrences;
 	while (cur) {
 		printf("%s %ld %ld\n", cur->cfile->name, cur->start, cur->end);
@@ -65,22 +80,23 @@ static int find_cmd(char *path, long offset)
 	return 0;
 }
 
-static int rename_cmd(char *path, long offset, char *newname)
+static int rename_cmd(int argc, char **argv)
 {
 	char dir[MAXPATHLEN];
 	char filename[MAXPATHLEN];
 	struct project *project;
 	struct cfile *cfile;
 	struct occurrence *occurrences;
-	dirname(dir, path);
-	basename(filename, path);
+	require_args(argc, argv, 3);
+	dirname(dir, argv[1]);
+	basename(filename, argv[1]);
 	chdir(dir);
 	project = project_init(".");
 	cfile = project_find(project, filename);
 	if (!cfile)
 		return 1;
-	occurrences = find_at(project, cfile, offset);
-	rename_at(occurrences, newname);
+	occurrences = find_at(project, cfile, atoi(argv[2]));
+	rename_at(occurrences, argv[3]);
 
 	free_occurrences(occurrences);
 	project_free(project);
@@ -115,14 +131,16 @@ int main(int argc, char **argv)
 	}
 	if (argc > optind) {
 		char *command = argv[optind];
-		if (!strcmp(command, "parse") && argc > 2)
-			return parse_cmd(argv[2]);
-		if (!strcmp(command, "getname") && argc > 3)
-			return getname_cmd(argv[2], atoi(argv[3]));
-		if (!strcmp(command, "find") && argc > 3)
-			return find_cmd(argv[2], atoi(argv[3]));
-		if (!strcmp(command, "rename") && argc > 4)
-			return rename_cmd(argv[2], atoi(argv[3]), argv[4]);
+		char **nargv = argv + optind;
+		int nargc = argc - optind;
+		if (!strcmp(command, "parse"))
+			return parse_cmd(nargc, nargv);
+		if (!strcmp(command, "getname"))
+			return getname_cmd(nargc, nargv);
+		if (!strcmp(command, "find"))
+			return find_cmd(nargc, nargv);
+		if (!strcmp(command, "rename"))
+			return rename_cmd(nargc, nargv);
 	}
 	print_help(argc, argv);
 	return 1;
