@@ -4,6 +4,7 @@
  * Copyright (C) 2008 Ali Gholami Rudi
  *
  */
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -85,18 +86,43 @@ static int rename_cmd(char *path, long offset, char *newname)
 	return 0;
 }
 
+static void print_help(int argc, char **argv)
+{
+		printf("Usage: %s COMMAND [ARGS]\n", argv[0]);
+}
+
+static void print_version(int argc, char **argv)
+{
+}
+
 int main(int argc, char **argv)
 {
-	if (argc > 1) {
-		if (!strcmp(argv[1], "parse") && argc > 2)
+	int c;
+	while ((c = getopt (argc, argv, "vh")) != -1) {
+		switch (c) {
+		case 'v':
+			print_version(argc, argv);
+			return 0;
+		case 'h':
+			print_help(argc, argv);
+			return 0;
+		case '?':
+		default:
+			fprintf(stderr, "Bad command line option\n");
+			return 1;
+		}
+	}
+	if (argc > optind) {
+		char *command = argv[optind];
+		if (!strcmp(command, "parse") && argc > 2)
 			return parse_cmd(argv[2]);
-		if (!strcmp(argv[1], "getname") && argc > 3)
+		if (!strcmp(command, "getname") && argc > 3)
 			return getname_cmd(argv[2], atoi(argv[3]));
-		if (!strcmp(argv[1], "find") && argc > 3)
+		if (!strcmp(command, "find") && argc > 3)
 			return find_cmd(argv[2], atoi(argv[3]));
-		if (!strcmp(argv[1], "rename") && argc > 4)
+		if (!strcmp(command, "rename") && argc > 4)
 			return rename_cmd(argv[2], atoi(argv[3]), argv[4]);
 	}
-	printf("Usage: %s COMMAND [ARGS]\n", argv[0]);
+	print_help(argc, argv);
 	return 1;
 }
