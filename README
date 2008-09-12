@@ -2,9 +2,101 @@
  ironout
 =========
 
-Ironout_ is a C refactoring tool.
+Ironout_ is a C refactoring tool.  It tries to be simple and fast.
 
 .. _ironout: http://ironout.berlios.de
+
+
+LIMITATIONS
+===========
+
+Patches are welcome ;-)
+
+*typedefs*:
+
+Currently typedefs make parsing errors.  The problem is C is a context
+dependent language.  That is we should know whether a name is an
+identifier or a typedef when parsing the source code.  I can think of
+hacks to make it work for some situations but not a clean approach
+that handles most.  This will be improved in future.
+
+*macros*:
+
+I think the only reliable way of handling macros is to use a
+pre-processor.  But the problem is we need offset information
+collected during parsing; the output of pre-processor tells us nothing
+about the original source code name offsets.
+
+So currently macro definitions are ignored and macro usages are
+thought of as normal functions and variables (the latter might cause
+syntax errors for complex macros).
+
+*fields*:
+
+In order to rename fields, we need to compute and save types involved
+in a C program.  Currently ironout does not do that; planned for
+future releases.
+
+
+USAGE
+=====
+
+After compiling the sources, a binary named ``ironout`` will be
+created; copy this file to a folder in your ``$PATH`` if you like.
+
+EMACS
+-----
+
+Ironout comes with a simple emacs minor mode.  To make it work add::
+
+  (setq ironout-path "/path/to/compiled/ironout")
+  (load-file "/path/to/ironout.el")
+
+to your ``~/.emacs`` file.  The minor mode is automatically activated
+in C files.  You can use these commands:
+
+=================  ========  ==============================
+Command            Key       Description
+=================  ========  ==============================
+ironout-rename     C-c i r   show renaming changes in a buffer
+ironout-find       C-c i f   find occurrences of a name
+=================  ========  ==============================
+
+You can use keys like "C-x `" that work with compilation buffer to
+move through occurrences after ``ironout-find`` command.
+
+CLI
+---
+
+You can use the command line interface to work with ``ironout``.
+As an example if ``test.c`` contains::
+
+  int var;
+  void f()
+  {
+  	var++;
+  }
+
+You can test ironout with::
+
+  $ ironout find test.c 4
+  test.c 4 7
+  test.c 21 24
+  $ ironout rename test.c 4 newvar
+  --- a/test.c
+  +++ b/test.c
+  @@ -1,5 +1,5 @@
+  -int var;
+  +int newvar;
+   void f()
+   {
+  -       var;
+  +       newvar;
+   }
+
+Note that all C files in the same directory as ``test.c`` are
+considered to be in the same project.  So renaming a name searches all
+those files.
 
 
 HACKING
@@ -33,14 +125,15 @@ of each test file starts with ``test-``.
 
 The format of this file is like::
 
-  [SEP] COMMAND ARGS
+  SEP COMMAND ARGS
   COMMAND_BLOCK
-  [SEP] NEXT_COMMAND ARGS
+  SEP NEXT_COMMAND ARGS
   COMMAND_BLOCK
   ...
 
 Where ``SEP`` is a string that does not contain spaces; it is used to
-find where commands start and end.  ``COMMAND`` shows what to do; they
+find where commands start and end (currently a colon is used as the
+separator in all of the tests).  ``COMMAND`` shows what to do; they
 are listed in the following table:
 
 =========  ======  =================================================
