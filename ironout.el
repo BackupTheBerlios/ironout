@@ -1,5 +1,10 @@
 ;;; ironout.el --- a minor mode for using ironout
 ;; Copyright (C) 2008 Ali Gholami Rudi
+
+;;; TODO
+;; * handle file names with spaces in ironout-find
+;; * interrupting ironout commands
+
 (defgroup ironout nil
   "ironout, A C refactoring tool."
   :link '(url-link "http://ironout.berlios.de/")
