@@ -21,9 +21,10 @@
 
 #define MAXPATHLEN	1024
 
-static void require_args(int argc, char **argv, int required)
+static void require_args(int argc, char **argv, int required, char *usage)
 {
 	if (argc < required + 1) {
+		fprintf(stderr, "Usage: %s %s\n\n", argv[0], usage);
 		fprintf(stderr, "%s command requires at least %d arguments\n",
 			argv[0], required);
 		exit(1);
@@ -33,7 +34,7 @@ static void require_args(int argc, char **argv, int required)
 static int parse_cmd(int argc, char **argv)
 {
 	struct cfile *cfile;
-	require_args(argc, argv, 1);
+	require_args(argc, argv, 1, "FILENAME");
 	cfile = cfile_init(argv[1]);
 	if (cfile)
 		cfile_free(cfile);
@@ -44,7 +45,7 @@ static int getname_cmd(int argc, char **argv)
 {
 	struct cfile *cfile;
 	struct node *found;
-	require_args(argc, argv, 2);
+	require_args(argc, argv, 2, "FILENAME OFFSET");
 	cfile = cfile_init(argv[1]);
 	found = node_find(cfile->node, atoi(argv[2]));
 	if (found && (found->type == AST_IDENTIFIER ||
@@ -61,7 +62,7 @@ static int find_cmd(int argc, char **argv)
 	struct project *project;
 	struct cfile *cfile;
 	struct occurrence *occurrences, *cur;
-	require_args(argc, argv, 2);
+	require_args(argc, argv, 2, "FILENAME OFFSET");
 	dirname(dir, argv[1]);
 	basename(filename, argv[1]);
 	chdir(dir);
@@ -87,7 +88,7 @@ static int rename_cmd(int argc, char **argv)
 	struct project *project;
 	struct cfile *cfile;
 	struct occurrence *occurrences;
-	require_args(argc, argv, 3);
+	require_args(argc, argv, 3, "FILENAME OFFSET NEWNAME");
 	dirname(dir, argv[1]);
 	basename(filename, argv[1]);
 	chdir(dir);
@@ -103,13 +104,30 @@ static int rename_cmd(int argc, char **argv)
 	return 0;
 }
 
+static char *usage =
+	"Usage: %s COMMAND [ARGS]\n\n"
+	"Command can be:\n"
+	"  rename:   rename a name and report the changes as a patch\n"
+	"  find:     find and list occurrences of a name\n"
+	"  getname:  print the name under point\n"
+	"  version:  print version number and exit\n";
+
 static void print_help(int argc, char **argv)
 {
-		printf("Usage: %s COMMAND [ARGS]\n", argv[0]);
+	printf(usage, argv[0]);
 }
+
+static char *version =
+	"Ironout 0.0.1\n"
+	"Copyright (C) 2008 Ali Gholami Rudi\n"
+	"You can redistribute and/or modify Ironout under the terms\n"
+	"of GNU General Public License.  For more information, see\n"
+	"the file named COPYING.\n";
+
 
 static void print_version(int argc, char **argv)
 {
+	printf(version);
 }
 
 int main(int argc, char **argv)
@@ -141,6 +159,10 @@ int main(int argc, char **argv)
 			return find_cmd(nargc, nargv);
 		if (!strcmp(command, "rename"))
 			return rename_cmd(nargc, nargv);
+		if (!strcmp(command, "version")) {
+			print_version(argc, argv);
+			return 0;
+		}
 	}
 	print_help(argc, argv);
 	return 1;
