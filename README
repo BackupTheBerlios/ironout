@@ -41,8 +41,9 @@ future releases.
 USAGE
 =====
 
-After compiling the sources, a binary named ``ironout`` will be
-created; copy this file to a folder in your ``$PATH`` if you like.
+For compiling you'll need flex and bison.  After compiling the
+sources, a binary named ``ironout`` will be created; copy this file to
+a folder in your ``$PATH`` if you like.
 
 EMACS
 -----
