@@ -17,6 +17,7 @@
 #include "name.h"
 #include "path.h"
 #include "project.h"
+#include "rename.h"
 
 #define MAXPATHLEN	1024
 
@@ -79,7 +80,7 @@ static int rename_cmd(char *path, long offset, char *newname)
 	if (!cfile)
 		return 1;
 	occurrences = find_at(project, cfile, offset);
-	rename(occurrences, newname);
+	rename_at(occurrences, newname);
 
 	free_occurrences(occurrences);
 	project_free(project);

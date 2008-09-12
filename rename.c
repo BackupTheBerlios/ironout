@@ -3,7 +3,7 @@
 #include "rename.h"
 #include "src.h"
 
-void rename(struct occurrence *occurrences, char *replacement)
+void rename_at(struct occurrence *occurrences, char *replacement)
 {
 	struct occurrence *cur = occurrences;
 	while (cur) {
