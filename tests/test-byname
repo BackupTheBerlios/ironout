@@ -1,0 +1,16 @@
+: # simple find by name
+-----------------------
+: write test.c
+int var;
+: ironout find test.c var
+test.c 4 7
+: # simple find by name in functions
+------------------------------------
+: write test.c
+int var;
+void f()
+{
+	int var = 0;
+}
+: ironout find test.c f:var
+test.c 25 28
