@@ -62,6 +62,7 @@ static int find_cmd(int argc, char **argv)
 	struct project *project;
 	struct cfile *cfile;
 	struct occurrence *occurrences, *cur;
+	struct name *name;
 	require_args(argc, argv, 2, "FILENAME OFFSET");
 	dirname(dir, argv[1]);
 	basename(filename, argv[1]);
@@ -70,7 +71,8 @@ static int find_cmd(int argc, char **argv)
 	cfile = project_find(project, filename);
 	if (!cfile)
 		return 1;
-	occurrences = find_at(project, cfile, atoi(argv[2]));
+	name = name_find(project, cfile, argv[2]);
+	occurrences = find_name(project, name);
 	cur = occurrences;
 	while (cur) {
 		printf("%s %ld %ld\n", cur->cfile->name, cur->start, cur->end);
@@ -87,7 +89,7 @@ static int rename_cmd(int argc, char **argv)
 	char filename[MAXPATHLEN];
 	struct project *project;
 	struct cfile *cfile;
-	struct occurrence *occurrences;
+	struct name *name;
 	require_args(argc, argv, 3, "FILENAME OFFSET NEWNAME");
 	dirname(dir, argv[1]);
 	basename(filename, argv[1]);
@@ -96,10 +98,8 @@ static int rename_cmd(int argc, char **argv)
 	cfile = project_find(project, filename);
 	if (!cfile)
 		return 1;
-	occurrences = find_at(project, cfile, atoi(argv[2]));
-	rename_at(occurrences, argv[3]);
-
-	free_occurrences(occurrences);
+	name = name_find(project, cfile, argv[2]);
+	rename_name(project, name, argv[3]);
 	project_free(project);
 	return 0;
 }

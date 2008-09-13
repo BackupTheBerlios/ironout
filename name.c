@@ -40,3 +40,29 @@ int modifiers_match(struct name *name, int flags)
 {
 	return !((name->flags ^ flags) & NAME_MOD_MASK);
 }
+
+struct name *name_find(struct project *project,
+		       struct cfile *cfile, char *location)
+{
+	struct node *node;
+	struct block *block;
+	struct name *name;
+	int i;
+	long offset = atoi(location);
+	node = node_find(cfile->node, offset);
+	if (!node)
+		return NULL;
+	block = block_find(cfile->block, offset);
+	if (!block)
+		return NULL;
+	name = block_lookup(block, node);
+	if (name)
+		return name;
+	for (i = 0; i < project->count; i++) {
+		struct cfile *cfile = project->files[i];
+		name = block_lookup(cfile->block, node);
+		if (name && !(name->flags & NAME_STATIC))
+			return name;
+	}
+	return NULL;
+}

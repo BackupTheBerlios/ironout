@@ -53,35 +53,8 @@ static struct occurrence *reverse(struct occurrence *o)
 	return newhead;
 }
 
-static struct name *find_definition(struct project *project,
-				    struct cfile *cfile, long offset)
+struct occurrence *find_name(struct project *project, struct name *name)
 {
-	struct node *node;
-	struct block *block;
-	struct name *name;
-	int i;
-	node = node_find(cfile->node, offset);
-	if (!node)
-		return NULL;
-	block = block_find(cfile->block, offset);
-	if (!block)
-		return NULL;
-	name = block_lookup(block, node);
-	if (name)
-		return name;
-	for (i = 0; i < project->count; i++) {
-		struct cfile *cfile = project->files[i];
-		name = block_lookup(cfile->block, node);
-		if (name && !(name->flags & NAME_STATIC))
-			return name;
-	}
-	return NULL;
-}
-
-struct occurrence *find_at(struct project *project,
-			   struct cfile *cfile, long offset)
-{
-	struct name *name = find_definition(project, cfile, offset);
 	if (name) {
 		struct finddata finddata;
 		int i;

@@ -11,8 +11,7 @@ struct occurrence {
 	struct occurrence *next;
 };
 
-struct occurrence *find_at(struct project *project,
-			   struct cfile *cfile, long offset);
+struct occurrence *find_name(struct project *project, struct name *name);
 void free_occurrences(struct occurrence *occurrences);
 
 #endif

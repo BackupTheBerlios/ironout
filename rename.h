@@ -5,6 +5,6 @@
 #include "find.h"
 #include "project.h"
 
-void rename_at(struct occurrence *occurrences, char *replacement);
+void rename_name(struct project *project, struct name *name, char *newname);
 
 #endif

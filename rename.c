@@ -1,11 +1,12 @@
 #include <string.h>
-#include "src.h"
+#include "find.h"
 #include "rename.h"
 #include "src.h"
 
-void rename_at(struct occurrence *occurrences, char *replacement)
+void rename_name(struct project *project, struct name *name, char *newname)
 {
-	struct occurrence *cur = occurrences;
+	struct occurrence *all = find_name(project, name);
+	struct occurrence *cur = all;
 	while (cur) {
 		struct cfile *cfile = cur->cfile;
 		struct src *orig = src_from_file(cur->cfile->name);
@@ -15,12 +16,13 @@ void rename_at(struct occurrence *occurrences, char *replacement)
 			long start = cur->start + diffs;
 			long end = cur->end + diffs;
 			src_delete(changed, start, end);
-			src_insert(changed, start, replacement);
+			src_insert(changed, start, newname);
 			cur = cur->next;
-			diffs += strlen(replacement) - (end - start);
+			diffs += strlen(newname) - (end - start);
 		}
 		src_print_diffs(orig, changed, cfile->name);
 		src_free(orig);
 		src_free(changed);
 	}
+	free_occurrences(all);
 }

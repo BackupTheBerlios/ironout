@@ -2,6 +2,8 @@
 #define _NAME_H
 
 #include "ast.h"
+#include "cfile.h"
+#include "project.h"
 
 #define NAME_VAR	0x0001
 #define NAME_PARAM	0x0002
@@ -26,6 +28,8 @@ struct name {
 };
 
 struct name *name_init(char *name, int flags);
+struct name *name_find(struct project *project,
+		       struct cfile *cfile, char *location);
 void name_free(struct name *name);
 int modifier_flags(struct node *node);
 int modifiers_match(struct name *name, int flags);
