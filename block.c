@@ -68,6 +68,13 @@ static void init_children(struct block *block)
 	block->walked = 1;
 }
 
+struct block_list *block_children(struct block *block)
+{
+	if (!block->walked)
+		init_children(block);
+	return block->children;
+}
+
 static void block_walk(struct block *block,
 		int (*see)(struct block *, void *),
 		void *data)
