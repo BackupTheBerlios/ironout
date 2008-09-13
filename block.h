@@ -11,9 +11,9 @@ struct block_list {
 
 struct block {
 	struct node *node;
-	struct block_list *children;
-	struct hash *names;
 	struct block *parent;
+	struct block_list *_children;
+	struct hash *_names;
 	unsigned walked : 1;
 };
 

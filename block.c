@@ -21,16 +21,16 @@ static void free_hashed(void *name, void *data)
 
 void block_free(struct block *block)
 {
-	struct block_list *cur = block->children;
+	struct block_list *cur = block->_children;
 	while (cur) {
 		struct block_list *next = cur->next;
 		block_free(cur->block);
 		free(cur);
 		cur = next;
 	}
-	if (block->names) {
-		hash_walk(block->names, free_hashed, NULL);
-		hash_release(block->names);
+	if (block->_names) {
+		hash_walk(block->_names, free_hashed, NULL);
+		hash_release(block->_names);
 	}
 	free(block);
 }
@@ -44,8 +44,8 @@ static int find_blocks(struct node *node, void *data)
 		struct block_list *newchild = xmalloc(sizeof(struct block_list));
 		newchild->block = block_init(node);
 		newchild->block->parent = block;
-		newchild->next = block->children;
-		block->children = newchild;
+		newchild->next = block->_children;
+		block->_children = newchild;
 		return 0;
 	}
 	return 1;
@@ -57,14 +57,14 @@ static void init_children(struct block *block)
 	struct block_list *newhead = NULL;
 	node_walk(block->node, find_blocks, block);
 	/* reversing children order */
-	cur = block->children;
+	cur = block->_children;
 	while (cur) {
 		struct block_list *next = cur->next;
 		cur->next = newhead;
 		newhead = cur;
 		cur = next;
 	}
-	block->children = newhead;
+	block->_children = newhead;
 	block->walked = 1;
 }
 
@@ -72,7 +72,7 @@ struct block_list *block_children(struct block *block)
 {
 	if (!block->walked)
 		init_children(block);
-	return block->children;
+	return block->_children;
 }
 
 static void block_walk(struct block *block,
@@ -81,9 +81,7 @@ static void block_walk(struct block *block,
 {
 	if (see(block, data)) {
 		struct block_list *cur;
-		if (!block->walked)
-			init_children(block);
-		cur = block->children;
+		cur = block_children(block);
 		while (cur) {
 			block_walk(cur->block, see, data);
 			cur = cur->next;
@@ -300,7 +298,7 @@ static int name_cmp(void *data, void *key)
 
 static void init_names(struct block *block)
 {
-	block->names = hash_init(name_hash, name_hash, name_cmp, 4);
+	block->_names = hash_init(name_hash, name_hash, name_cmp, 4);
 	if (block->node->type == AST_FUNCTION) {
 		/* FUNCTION -> DECL -> DECL2 -> PARAMLIST */
 		struct node *node = block->node;
@@ -324,9 +322,9 @@ static void init_names(struct block *block)
 
 struct hash *block_names(struct block *block)
 {
-	if (!block->names)
+	if (!block->_names)
 		init_names(block);
-	return block->names;
+	return block->_names;
 }
 
 struct name *name_on(struct node *node)
