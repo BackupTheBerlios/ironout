@@ -84,3 +84,16 @@ int node_isfield(struct node *node)
 		return 1;
 	return 0;
 }
+
+char *declarator_name(struct node *node)
+{
+	struct node *cur = node;
+	while (cur->count)
+		if (cur->type == AST_PTR)
+			cur = cur->children[cur->count - 1];
+		else
+			cur = cur->children[0];
+	if (cur->type == AST_IDENTIFIER)
+		return cur->data;
+	return NULL;
+}

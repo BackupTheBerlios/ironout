@@ -127,19 +127,6 @@ static void handle_enum(struct block *block, struct node *node)
 	}
 }
 
-static char *get_declarator_name(struct node *node)
-{
-	struct node *cur = node;
-	while (cur->count)
-		if (cur->type == AST_PTR)
-			cur = cur->children[cur->count - 1];
-		else
-			cur = cur->children[0];
-	if (cur->type == AST_IDENTIFIER)
-		return cur->data;
-	return NULL;
-}
-
 static void handle_struct(struct block *block, struct node *node)
 {
 	if (node->count < 3)
@@ -195,7 +182,7 @@ static void handle_function(struct block *block, struct node *node)
 	struct declinfo declinfo;
 	memset(&declinfo, 0, sizeof(declinfo));
 	node_walk(node->children[0], analyze_declspec, &declinfo);
-	name = get_declarator_name(node->children[1]);
+	name = declarator_name(node->children[1]);
 	if (name) {
 		int flags = declinfo_flags(&declinfo) | NAME_FUNCTION;
 		hash_put(block_names(block), name_init(name, flags));
@@ -216,7 +203,7 @@ static void add_declarator_name(struct declinfo *declinfo, struct node *decl)
 	default:
 		break;
 	}
-	name = get_declarator_name(decl);
+	name = declarator_name(decl);
 	if (name)
 		hash_put(block_names(block),
 			 name_init(name, declinfo_flags(declinfo)));
@@ -253,7 +240,7 @@ static void handle_parameters(struct block *block, struct node *node)
 	for (i = 0; i < node->count; i++) {
 		struct node *param = node->children[i];
 		if (param->count > 1) {
-			char *name = get_declarator_name(
+			char *name = declarator_name(
 				param->children[param->count - 1]);
 			if (name)
 				hash_put(block_names(block),
