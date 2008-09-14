@@ -27,6 +27,9 @@ struct name {
 	int flags;
 };
 
+struct project;
+struct cfile;
+
 struct name *name_init(char *name, int flags);
 struct name *name_find(struct project *project,
 		       struct cfile *cfile, char *location);
