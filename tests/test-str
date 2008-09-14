@@ -1,0 +1,7 @@
+: # test string concatenation
+-----------------------------
+: write test.c
+char *var = "part1"
+            "part2";
+: ironout find test.c var
+test.c 6 9
