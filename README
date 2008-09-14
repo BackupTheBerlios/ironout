@@ -95,9 +95,59 @@ You can test ironout with::
   +       newvar;
    }
 
-Note that all C files in the same directory as ``test.c`` are
-considered to be in the same project.  So renaming a name searches all
-those files.
+Unless you're writing a plugin, working with offsets is hard; instead
+you can use name hierarchies for specifying names.  For instance, if
+``test.c`` contains::
+
+  struct var {
+	  int field;
+  };
+  void f()
+  {
+	  struct var var;
+	  var.field = 0;
+  }
+
+These command are valid:
+
+  $ ironout rename test.c "struct var" newvar
+  diff --git a/test.c b/test.c
+  --- a/test.c
+  +++ b/test.c
+  @@ -1,8 +1,8 @@
+  -struct var {
+  +struct newvar {
+	  int field;
+   };
+   void f()
+   {
+  -	struct var var;
+  +	struct newvar var;
+	  var.field = 0;
+   }
+  $ ironout rename test.c f:var newvar
+  diff --git a/test.c b/test.c
+  --- a/test.c
+  +++ b/test.c
+  @@ -3,6 +3,6 @@
+   };
+   void f()
+   {
+  -	struct var var;
+  -	var.field = 0;
+  +	struct var newvar;
+  +	newvar.field = 0;
+   }
+
+A few notes:
+
+* All C files in the same directory as ``test.c`` are considered to be
+  in the same project.  So renaming a name searches all of these
+  files.
+* A colon can be used to point to names inside functions; like
+  ``f:var`` as shown above
+* struct, union, enum and label tags can be used to rename names with
+  tags; like ``struct var`` in above example.
 
 
 HACKING
