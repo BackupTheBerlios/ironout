@@ -38,7 +38,7 @@ static int parse_cmd(int argc, char **argv)
 	cfile = cfile_init(argv[1]);
 	if (cfile)
 		cfile_free(cfile);
-	return !!cfile;
+	return !cfile;
 }
 
 static int getname_cmd(int argc, char **argv)
