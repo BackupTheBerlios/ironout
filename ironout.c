@@ -118,7 +118,7 @@ static void print_help(int argc, char **argv)
 }
 
 static char *version =
-	"Ironout 0.0.1\n"
+	"Ironout 0.0.2\n"
 	"Copyright (C) 2008 Ali Gholami Rudi\n"
 	"You can redistribute and/or modify Ironout under the terms\n"
 	"of GNU General Public License.  For more information, see\n"
