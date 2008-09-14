@@ -24,9 +24,14 @@ primary_expr
 	: identifier
 	| CONSTANT
 		{ push_node(AST_INTEGER, @$.start, @$.end, 0); }
-	| STRING_LITERAL
+	| joined_string
 		{ push_node(AST_STRING, @$.start, @$.end, 0); }
 	| '(' expr ')'
+	;
+
+joined_string
+	: joined_string STRING_LITERAL
+	| STRING_LITERAL
 	;
 
 postfix_expr
