@@ -157,7 +157,7 @@ static int find_end(int start, char *diffs, int size)
 		if (ones == 7)
 			return cur - 3 < start ? start : cur - 3;
 	}
-	return size;
+	return ones < 3 ? size : size + 3 - ones;
 }
 
 static void print_hunk(struct src *src1, struct src *src2,
