@@ -4,14 +4,14 @@
 #include "cfile.h"
 #include "project.h"
 
-struct occurrence {
+struct hit {
 	long start;
 	long end;
 	struct cfile *cfile;
-	struct occurrence *next;
+	struct hit *next;
 };
 
-struct occurrence *find_name(struct project *project, struct name *name);
-void free_occurrences(struct occurrence *occurrences);
+struct hit *find_name(struct project *project, struct name *name);
+void free_hits(struct hit *hits);
 
 #endif

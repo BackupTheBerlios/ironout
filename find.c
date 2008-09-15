@@ -8,7 +8,7 @@ struct finddata {
 	struct cfile *cfile;
 	struct block *block;
 	struct name *name;
-	struct occurrence *occurrence;
+	struct hit *hit;
 };
 
 static int extern_node_matches(struct name *name, struct node *node)
@@ -27,25 +27,25 @@ static int does_match(struct node *node, void *data)
 		struct name *name = block_lookup(block, node);
 		if ((!name && extern_node_matches(finddata->name, node)) ||
 		    name == finddata->name) {
-			struct occurrence *occurrence =
-				xmalloc(sizeof(struct occurrence));
-			occurrence->start = node->start;
-			occurrence->end = node->end;
-			occurrence->cfile = finddata->cfile;
-			occurrence->next = finddata->occurrence;
-			finddata->occurrence = occurrence;
+			struct hit *hit =
+				xmalloc(sizeof(struct hit));
+			hit->start = node->start;
+			hit->end = node->end;
+			hit->cfile = finddata->cfile;
+			hit->next = finddata->hit;
+			finddata->hit = hit;
 		}
 	}
 	/* don't check nodes outside defining block */
 	return 1;
 }
 
-static struct occurrence *reverse(struct occurrence *o)
+static struct hit *reverse(struct hit *o)
 {
-	struct occurrence *newhead = NULL;
-	struct occurrence *cur = o;
+	struct hit *newhead = NULL;
+	struct hit *cur = o;
 	while (cur) {
-		struct occurrence *next = cur->next;
+		struct hit *next = cur->next;
 		cur->next = newhead;
 		newhead = cur;
 		cur = next;
@@ -53,12 +53,12 @@ static struct occurrence *reverse(struct occurrence *o)
 	return newhead;
 }
 
-struct occurrence *find_name(struct project *project, struct name *name)
+struct hit *find_name(struct project *project, struct name *name)
 {
 	if (name) {
 		struct finddata finddata;
 		int i;
-		finddata.occurrence = NULL;
+		finddata.hit = NULL;
 		finddata.name = name;
 		for (i = project->count - 1; i >= 0; --i) {
 			struct cfile *cur = project->files[i];
@@ -66,16 +66,16 @@ struct occurrence *find_name(struct project *project, struct name *name)
 			finddata.cfile = cur;
 			node_walk(cur->node, does_match, &finddata);
 		}
-		return reverse(finddata.occurrence);
+		return reverse(finddata.hit);
 	}
 	return NULL;
 }
 
-void free_occurrences(struct occurrence *occurrence_list)
+void free_hits(struct hit *hit_list)
 {
-	struct occurrence *cur = occurrence_list;
+	struct hit *cur = hit_list;
 	while (cur) {
-		struct occurrence *next = cur->next;
+		struct hit *next = cur->next;
 		free(cur);
 		cur = next;
 	}

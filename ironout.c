@@ -61,7 +61,7 @@ static int find_cmd(int argc, char **argv)
 	char filename[MAXPATHLEN];
 	struct project *project;
 	struct cfile *cfile;
-	struct occurrence *occurrences, *cur;
+	struct hit *hits, *cur;
 	struct name *name;
 	require_args(argc, argv, 2, "FILENAME OFFSET");
 	dirname(dir, argv[1]);
@@ -72,13 +72,13 @@ static int find_cmd(int argc, char **argv)
 	if (!cfile)
 		return 1;
 	name = name_find(project, cfile, argv[2]);
-	occurrences = find_name(project, name);
-	cur = occurrences;
+	hits = find_name(project, name);
+	cur = hits;
 	while (cur) {
 		printf("%s %ld %ld\n", cur->cfile->name, cur->start, cur->end);
 		cur = cur->next;
 	}
-	free_occurrences(occurrences);
+	free_hits(hits);
 	project_free(project);
 	return 0;
 }

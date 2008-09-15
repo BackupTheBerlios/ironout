@@ -5,8 +5,8 @@
 
 void rename_name(struct project *project, struct name *name, char *newname)
 {
-	struct occurrence *all = find_name(project, name);
-	struct occurrence *cur = all;
+	struct hit *all = find_name(project, name);
+	struct hit *cur = all;
 	while (cur) {
 		struct cfile *cfile = cur->cfile;
 		struct src *orig = src_from_file(cur->cfile->name);
@@ -24,5 +24,5 @@ void rename_name(struct project *project, struct name *name, char *newname)
 		src_free(orig);
 		src_free(changed);
 	}
-	free_occurrences(all);
+	free_hits(all);
 }
