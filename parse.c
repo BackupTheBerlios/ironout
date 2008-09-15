@@ -201,6 +201,7 @@ int is_typename(char *name)
 	if (!typedefs) {
 		add_type("FILE");
 		add_type("size_t");
+		add_type("DIR");
 	}
 	return hash_get(typedefs, name) != NULL;
 }
