@@ -40,13 +40,15 @@ static int list_size(struct node *node)
 {
 	int result = 0;
 	struct node *cur = node;
-	if (!list_nodetype(node->type))
+	int preorder;
+	if (!list_nodetype(node->type) || !node->count)
 		return 0;
+	preorder = cur->children[0]->type == node->type;
 	while (cur->type == node->type) {
 		result++;
 		if (cur->count != 2)
 			return result;
-		if (cur->children[0]->type == node->type)
+		if (preorder)
 			cur = cur->children[0];
 		else
 			cur = cur->children[1];
@@ -73,21 +75,22 @@ static void linear_lists(struct node *node)
 	int i;
 	if (n) {
 		struct node *cur = node;
-		struct node *old = NULL;
 		struct node **newchildren = xmalloc(n * sizeof(struct node *));
-		int start = 0, end = n;
+		int preorder = cur->children[0]->type == node->type;
 		for (i = 0; i < n; i++) {
-			if (cur->children[0]->type != node->type) {
-				newchildren[start++] = cur->children[0];
+			struct node *old = cur;
+			if (preorder) {
 				if (cur->count > 1)
-					cur = cur->children[1];
-			} else {
-				newchildren[--end] = cur->children[1];
+					newchildren[n - i - 1] = cur->children[1];
+				else
+					newchildren[n - i - 1] = cur->children[0];
 				cur = cur->children[0];
+			} else {
+				newchildren[i] = cur->children[0];
+				cur = cur->children[cur->count - 1];
 			}
-			if (old)
+			if (old != node && i < n - 1)
 				node_free_base(old, 0);
-			old = cur;
 		}
 		for (i = 0; i < n; i++)
 			newchildren[i]->parent = node;
