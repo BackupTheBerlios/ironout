@@ -2,7 +2,6 @@ TODO
 ====
 
 * specifying which files to search
-* specifying a name by using hierarchies; func:var
 * renaming fields; requires knowing name types
 * identifying typedef names
 * better macro handling
