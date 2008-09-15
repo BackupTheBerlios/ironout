@@ -31,6 +31,9 @@
     (setq buffer-read-only 't)
   ))
 
+(defvar ironout-current-hit 0
+  "Points to current occurrence in *ironout-find* buffer.")
+
 (defun ironout-find ()
   "Find occurrences of a name."
   (interactive)
@@ -44,10 +47,11 @@
     (with-current-buffer buffer
       (goto-char (point-min))
       (setq buffer-read-only 't)
-      (local-set-key (kbd "RET") 'ironout-goto-occurrence)
-      (local-set-key (kbd "C-j") 'ironout-goto-occurrence)
+      (local-set-key (kbd "RET") 'ironout-goto-hit)
+      (local-set-key (kbd "C-j") 'ironout-goto-hit)
       (local-set-key (kbd "q") 'delete-window)
       (recenter))
+    (setq ironout-current-hit 0)
     (setq next-error-function 'ironout-goto-next)
     (display-buffer buffer)
   ))
@@ -56,15 +60,21 @@
   (switch-to-buffer-other-window "*ironout-find*" t)
   (if reset
       (goto-char (point-min)))
-  (forward-line (- arg 1))
-  (if (eobp)
-      ;; should go back to the older buffer here!
-      (message "Moved past last occurrence!")
-    (ironout-goto-occurrence))
+  (setq ironout-current-hit (+ ironout-current-hit arg))
+  (cond
+   ((>= ironout-current-hit (line-number-at-pos (point-max)))
+    (message "Moved past last hit!")
+    (setq ironout-current-hit (line-number-at-pos (point-max))))
+   ((<= ironout-current-hit 0)
+    (message "Moved back before first hit!")
+    (setq ironout-current-hit 0))
+   ('t
+    (goto-line ironout-current-hit)
+    (ironout-goto-hit)))
   (if (string-equal "*ironout-find*" (buffer-name))
       (other-window -1)))
 
-(defun ironout-goto-occurrence ()
+(defun ironout-goto-hit ()
   (interactive)
   (end-of-line)
   (let ((end (point)))
