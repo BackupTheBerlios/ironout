@@ -108,7 +108,7 @@ you can use name hierarchies for specifying names.  For instance, if
 	  var.field = 0;
   }
 
-These command are valid:
+These command are valid::
 
   $ ironout rename test.c "struct var" newvar
   diff --git a/test.c b/test.c
