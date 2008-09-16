@@ -57,9 +57,7 @@ static int node_insidedecl(struct node *node)
 		switch (node->type) {
 		case AST_DECL:
 		case AST_DIRDECL:
-		case AST_PARAMDECL:
 		case AST_PARAMLIST:
-		case AST_IDLIST:
 			break;
 		default:
 			return node->type != AST_FUNCTION;
@@ -81,7 +79,7 @@ static int node_isparamdecl(struct node *node)
 			break;
 		case AST_IDLIST:
 		case AST_PARAMDECL:
-			return node_insidedecl(cur);
+			return node_insidedecl(cur->parent);
 		default:
 			return 0;
 		}
