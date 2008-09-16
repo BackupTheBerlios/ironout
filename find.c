@@ -11,24 +11,24 @@ struct finddata {
 	struct hit *hit;
 };
 
-static int extern_node_matches(struct name *name, struct node *node)
+static int extern_node_matches(struct name *expected, struct node *node)
 {
-	if (!modifiers_match(name, modifier_flags(node)) ||
-	    name->flags & NAME_STATIC)
+	int flags = modifier_flags(node);
+	if (!modifiers_match(expected, flags) || expected->flags & NAME_STATIC)
 		return 0;
-	return !strcmp(name->name, node->data) && !node_isfield(node);
+	return !(flags & (NAME_FIELD | NAME_PARAMDECL));
 }
 
 static int does_match(struct node *node, void *data)
 {
 	struct finddata *finddata = data;
-	if (node->type == AST_IDENTIFIER || node->type == AST_TYPENAME) {
+	if ((node->type == AST_IDENTIFIER || node->type == AST_TYPENAME) &&
+	    !strcmp(finddata->name->name, node->data)) {
 		struct block *block = block_find(finddata->block, node->start);
 		struct name *name = block_lookup(block, node);
 		if ((!name && extern_node_matches(finddata->name, node)) ||
 		    name == finddata->name) {
-			struct hit *hit =
-				xmalloc(sizeof(struct hit));
+			struct hit *hit = xmalloc(sizeof(struct hit));
 			hit->start = node->start;
 			hit->end = node->end;
 			hit->cfile = finddata->cfile;
