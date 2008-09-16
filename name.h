@@ -35,7 +35,7 @@ struct name *name_init(char *name, int flags);
 struct name *name_find(struct project *project,
 		       struct cfile *cfile, char *location);
 void name_free(struct name *name);
-int guess_name_modifiers(struct node *node);
+int guess_name_flags(struct node *node);
 int modifiers_match(struct name *name, int flags);
 
 #endif

@@ -336,7 +336,7 @@ struct name *name_on(struct node *node)
 {
 	if (node->type != AST_IDENTIFIER && node->type != AST_TYPENAME)
 		return NULL;
-	return name_init(node->data, guess_name_modifiers(node));
+	return name_init(node->data, guess_name_flags(node));
 }
 
 struct block *block_defining(struct block *block, struct node *node)

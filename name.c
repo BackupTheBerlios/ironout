@@ -89,7 +89,7 @@ static int node_isparamdecl(struct node *node)
 	return 0;
 }
 
-int guess_name_modifiers(struct node *node)
+int guess_name_flags(struct node *node)
 {
 	int flags = 0;
 	struct node *parent = node->parent;
