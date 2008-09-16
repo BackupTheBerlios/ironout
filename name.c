@@ -19,6 +19,76 @@ void name_free(struct name *name)
 	free(name);
 }
 
+static int struct_node(struct node *node)
+{
+	if (!node)
+		return 0;
+	switch (node->type) {
+	case AST_DIRDECL:
+	case AST_DECL:
+	case AST_DECLLIST:
+	case AST_DECLSPEC:
+	case AST_DECLSTMT:
+		return struct_node(node->parent);
+	case AST_STRUCTBITS:
+	case AST_STRUCTDECLLIST:
+		return 1;
+	default:
+		return 0;
+	}
+}
+
+int node_isfield(struct node *node)
+{
+	struct node *cur = node->parent;
+	if (!cur)
+		return 0;
+	if ((cur->type == AST_GETATTR || cur->type == AST_DEREF)
+	    && cur->children[1] == node)
+		return 1;
+	if (struct_node(cur))
+		return 1;
+	return 0;
+}
+
+static int node_insidedecl(struct node *node)
+{
+	while (node) {
+		switch (node->type) {
+		case AST_DECL:
+		case AST_DIRDECL:
+		case AST_PARAMDECL:
+		case AST_PARAMLIST:
+		case AST_IDLIST:
+			break;
+		default:
+			return node->type != AST_FUNCTION;
+		}
+		node = node->parent;
+	}
+	return 1;
+}
+
+static int node_isparamdecl(struct node *node)
+{
+	struct node *cur = node;
+	while (cur) {
+		switch (cur->type) {
+		case AST_DIRDECL:
+		case AST_DECL:
+		case AST_IDENTIFIER:
+			cur = cur->parent;
+			break;
+		case AST_IDLIST:
+		case AST_PARAMDECL:
+			return node_insidedecl(cur);
+		default:
+			return 0;
+		}
+	}
+	return 0;
+}
+
 int modifier_flags(struct node *node)
 {
 	int flags = 0;
@@ -37,6 +107,10 @@ int modifier_flags(struct node *node)
 		    parent->type == AST_GOTO)
 			flags |= NAME_LABEL;
 	}
+	if (node_isfield(node))
+		flags |= NAME_FIELD;
+	if (node_isparamdecl(node))
+		flags |= NAME_PARAMDECL;
 	return flags;
 }
 
