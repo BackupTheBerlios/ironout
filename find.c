@@ -13,7 +13,7 @@ struct finddata {
 
 static int extern_node_matches(struct name *expected, struct node *node)
 {
-	int flags = modifier_flags(node);
+	int flags = guess_name_modifiers(node);
 	if (!modifiers_match(expected, flags) || expected->flags & NAME_STATIC)
 		return 0;
 	return !(flags & (NAME_FIELD | NAME_PARAMDECL));
