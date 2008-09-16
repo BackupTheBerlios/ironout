@@ -82,7 +82,6 @@
     (let ((line (buffer-substring-no-properties (point) end)))
       (let ((tokens (split-string line)))
 	(recenter 0)
-	(forward-line 1)
 	(find-file-other-window (nth 0 tokens))
 	(goto-char (+ (string-to-number (nth 1 tokens)) 1))
 	)
