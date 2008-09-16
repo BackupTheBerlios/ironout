@@ -146,6 +146,7 @@ static void handle_struct(struct block *block, struct node *node)
 
 struct declinfo {
 	struct block *block;
+	int flags;
 	unsigned isstatic : 1;
 	unsigned isextern : 1;
 };
@@ -178,7 +179,7 @@ static int declinfo_flags(struct declinfo *declinfo)
 		flags |= NAME_STATIC;
 	if (declinfo->isextern)
 		flags |= NAME_EXTERN;
-	return flags;
+	return flags | declinfo->flags;
 }
 
 static void handle_function(struct block *block, struct node *node)
@@ -229,11 +230,14 @@ static int search_declarators(struct node *node, void *data)
 	return 1;
 }
 
-static void handle_declaration(struct block *block, struct node *node)
+static void handle_declaration(struct block *block,
+			       struct node *node,
+			       int flags)
 {
 	struct declinfo declinfo;
 	memset(&declinfo, 0, sizeof(declinfo));
 	declinfo.block = block;
+	declinfo.flags = flags;
 	node_walk(node->children[0], analyze_declspec, &declinfo);
 	if (node->count > 1)
 		node_walk(node->children[1], search_declarators, &declinfo);
@@ -268,7 +272,7 @@ static int find_names(struct node *node, void *data)
 		handle_function(block, node);
 		break;
 	case AST_DECLSTMT:
-		handle_declaration(block, node);
+		handle_declaration(block, node, 0);
 		break;
 	case AST_LABELED:
 		handle_label(block, node);
@@ -313,7 +317,8 @@ static void init_names(struct block *block)
 			struct node *decllist = node->children[node->count - 2];
 			for (i = 0; i < decllist->count; i++)
 				handle_declaration(block,
-						   decllist->children[i]);
+						   decllist->children[i],
+						   NAME_PARAM);
 		}
 	} else {
 		node_walk(block->node, find_names, block);
@@ -347,7 +352,7 @@ struct name *block_lookup(struct block *block, struct node *node)
 {
 	struct name *name = name_on(node);
 	struct name *result = NULL;
-	if (!name || node_isfield(node))
+	if (!name || name->flags & (NAME_FIELD | NAME_PARAMDECL))
 		return NULL;
 	while (block) {
 		struct name *cur = hash_get(block_names(block), name);
