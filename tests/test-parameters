@@ -20,3 +20,10 @@ int var;
 test.c 7 10
 test.c 16 19
 test.c 24 27
+: # test function declarations
+------------------------------
+: write test.c
+int var;
+int f(int var);
+: ironout find test.c var
+test.c 4 7
