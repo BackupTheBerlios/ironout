@@ -112,7 +112,6 @@ void node_free(struct node *node);
 struct node *node_find(struct node *node, long offset);
 void node_walk(struct node *, int (*) (struct node *, void *), void *);
 int node_cmp(struct node *n1, struct node *n2);
-int node_isfield(struct node *node);
 char *declarator_name(struct node *node);
 
 #endif
