@@ -27,3 +27,11 @@ int var;
 int f(int var);
 : ironout find test.c var
 test.c 4 7
+: # test function declarations 2
+--------------------------------
+: write test.c
+int f(void (*g)(int arg), int arg)
+{
+}
+: ironout find test.c 30
+test.c 30 33
