@@ -610,6 +610,7 @@ block_item
 
 expression_statement
 	: ';'
+		{ push_node(AST_STMT, @$.start, @$.end, 0); }
 	| expr ';'
 		{ push_node(AST_STMT, @$.start, @$.end, 1); }
 	;
