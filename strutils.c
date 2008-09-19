@@ -41,6 +41,9 @@ int startswith(char *heystack, char *needle)
 
 int endswith(char *heystack, char *needle)
 {
-	return strstr(heystack, needle) ==
-		heystack + strlen(heystack) - strlen(needle);
+	char *p = heystack + strlen(heystack);
+	char *q = needle + strlen(needle);
+	while (q != needle && p != heystack && *--p == *--q)
+		;
+	return *p == *q && q == needle;
 }
