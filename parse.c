@@ -120,7 +120,7 @@ struct node *parse(char *filename)
 	yyrestart(file);
 	yyparse();
 	fclose(file);
-	reset_tokenizer();
+	reset_tokenizer(filename);
 	if (parse_error || nodecount != 1) {
 		fprintf(stderr, "ERROR: %d nodes on the stack\n", nodecount);
 		error_happened();
@@ -128,11 +128,6 @@ struct node *parse(char *filename)
 	}
 	linear_lists(nodestack[0]);
 	return nodestack[--nodecount];
-}
-
-static int str_cmp(void *data, void *key)
-{
-	return strcmp(data, key);
 }
 
 struct node *push_node(enum nodetype type, long start, long end, int nchild)
@@ -185,23 +180,4 @@ struct node *push_decl(enum nodetype type, long start, long end,
 void node_free(struct node *node)
 {
 	node_free_base(node, 1);
-}
-
-static struct hash *typedefs = NULL;
-
-static void add_type(char *typename)
-{
-	if (!typedefs)
-		typedefs = hash_init(str_hash, str_hash, str_cmp, 16);
-	hash_put(typedefs, typename);
-}
-
-int is_typename(char *name)
-{
-	if (!typedefs) {
-		add_type("FILE");
-		add_type("size_t");
-		add_type("DIR");
-	}
-	return hash_get(typedefs, name) != NULL;
 }

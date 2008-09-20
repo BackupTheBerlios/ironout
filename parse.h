@@ -21,10 +21,10 @@ struct yyltype {
 
 void yyerror(char *s);
 int yylex();
-void yyrestart(FILE *filename);
+void yyrestart(FILE *file);
 int yyparse();
 
-void reset_tokenizer();
+void reset_tokenizer(char *filename);
 
 #include "cyacc.h"
 #include "ast.h"
@@ -34,6 +34,6 @@ struct node *push_node_name(enum nodetype type, long start, long end, char *name
 struct node *push_decl(enum nodetype type, long start, long end,
 		       int nchild, enum decltype decltype);
 
-int is_typename(char *name);
+int typedef_name(char *filename, char *name, long offset);
 
 #endif

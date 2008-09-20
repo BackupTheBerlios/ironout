@@ -128,8 +128,9 @@ int yywrap()
 
 #define MAXTOKLEN	4 * 1024
 
-char token_str[MAXTOKLEN];
 long token_offset = 0;
+static char token_str[MAXTOKLEN];
+static char *cur_filename = NULL;
 
 static void count()
 {
@@ -147,10 +148,12 @@ static void ignore()
 
 static int check_type()
 {
-	return is_typename(yytext) ? TYPE_NAME : IDENTIFIER;
+	return typedef_name(cur_filename, yytext, yylloc.start) ?
+		TYPE_NAME : IDENTIFIER;
 }
 
-void reset_tokenizer()
+void reset_tokenizer(char *filename)
 {
 	token_offset = 0;
+	cur_filename = filename;
 }
