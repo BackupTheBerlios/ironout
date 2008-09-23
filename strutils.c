@@ -34,9 +34,9 @@ char *nthtoken(char *to, char *from, char* delims, int n)
 
 int startswith(char *heystack, char *needle)
 {
-	while (*heystack != '\0' && *needle++ == *heystack++)
-		;
-	return !*heystack;
+	while (*needle != '\0' && *needle == *heystack++)
+		needle++;
+	return !*needle;
 }
 
 int endswith(char *heystack, char *needle)
