@@ -7,6 +7,21 @@ Ironout_ is a C refactoring tool.  It tries to be simple and fast.
 .. _ironout: http://ironout.berlios.de
 
 
+NEWS
+====
+
+The command line interface has been enhanced to support using variable
+names for specifying what to rename or find; see the examples in usage
+section.
+
+A new function, ``typedef_name`` in ``typedef.c``, is called to decide
+whether a name is a typedef or an identifier.  This is the place to
+change in order to support parsing files with typedefs.
+
+There were many bug fixes and minor enhancements; now ironout can be
+used on itself.  See repository logs for more information.
+
+
 LIMITATIONS
 ===========
 
