@@ -377,16 +377,16 @@ enumerator
 
 type_qualifier
 	: CONST
-		{ push_node(AST_TYPEQUAL, @$.start, @$.end, 1); }
+		{ push_node(AST_TYPEQUAL, @$.start, @$.end, 0); }
 	| RESTRICT
-		{ push_node(AST_TYPEQUAL, @$.start, @$.end, 1); }
+		{ push_node(AST_TYPEQUAL, @$.start, @$.end, 0); }
 	| VOLATILE
-		{ push_node(AST_TYPEQUAL, @$.start, @$.end, 1); }
+		{ push_node(AST_TYPEQUAL, @$.start, @$.end, 0); }
 	;
 
 function_specifier
 	: INLINE
-		{ push_node(AST_FUNCSPEC, @$.start, @$.end, 1); }
+		{ push_node(AST_FUNCSPEC, @$.start, @$.end, 0); }
 	;
 
 declarator
