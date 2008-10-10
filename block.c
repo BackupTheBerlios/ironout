@@ -5,6 +5,10 @@
 #include "name.h"
 #include "utils.h"
 
+struct ref {
+	char *name;
+	int flags;
+};
 
 struct block *block_init(struct node *node)
 {
@@ -291,18 +295,23 @@ static long name_hash(void *name)
 	return str_hash(((struct name *) name)->name);
 }
 
+static long ref_hash(void *name)
+{
+	return str_hash(((struct name *) name)->name);
+}
+
 static int name_cmp(void *data, void *key)
 {
-	struct name *n1 = data;
-	struct name *n2 = key;
-	if (!strcmp(n1->name, n2->name))
-		return !modifiers_match(n1, n2->flags);
+	struct name *name = data;
+	struct ref *ref = key;
+	if (!strcmp(name->name, ref->name))
+		return !modifiers_match(name, ref->flags);
 	return 1;
 }
 
 static void init_names(struct block *block)
 {
-	block->_names = hash_init(name_hash, name_hash, name_cmp, 4);
+	block->_names = hash_init(name_hash, ref_hash, name_cmp, 4);
 	if (block->node->type == AST_FUNCTION) {
 		/* FUNCTION -> DECL -> DECL2 -> PARAMLIST */
 		struct node *node = block->node;
@@ -332,36 +341,40 @@ struct hash *block_names(struct block *block)
 	return block->_names;
 }
 
-struct name *name_on(struct node *node)
+struct ref *name_on(struct node *node)
 {
+	struct ref *ref;
 	if (node->type != AST_IDENTIFIER && node->type != AST_TYPENAME)
 		return NULL;
-	return name_init(node->data, guess_name_flags(node));
+	ref = xmalloc(sizeof(*ref));
+	ref->name = node->data;
+	ref->flags = guess_name_flags(node);
+	return ref;
 }
 
 struct block *block_defining(struct block *block, struct node *node)
 {
-	struct name *name = name_on(node);
-	while (block && !hash_get(block_names(block), name))
+	struct ref *ref = name_on(node);
+	while (block && !hash_get(block_names(block), ref))
 		block = block->parent;
-	name_free(name);
+	free(ref);
 	return block;
 }
 
 struct name *block_lookup(struct block *block, struct node *node)
 {
-	struct name *name = name_on(node);
+	struct ref *ref = name_on(node);
 	struct name *result = NULL;
-	if (!name || name->flags & (NAME_FIELD | NAME_PARAMDECL))
+	if (!ref || ref->flags & (NAME_FIELD | NAME_PARAMDECL))
 		return NULL;
 	while (block) {
-		struct name *cur = hash_get(block_names(block), name);
+		struct name *cur = hash_get(block_names(block), ref);
 		if (cur) {
 			result = cur;
 			break;
 		}
 		block = block->parent;
 	}
-	name_free(name);
+	free(ref);
 	return result;
 }
