@@ -8,7 +8,7 @@ struct project {
 	int count;
 };
 
-struct project *project_init();
+struct project *project_init(char *root);
 void project_free(struct project *project);
 
 struct cfile *project_find(struct project *project, char *filename);
