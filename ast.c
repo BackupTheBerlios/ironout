@@ -53,7 +53,7 @@ int node_cmp(struct node *n1, struct node *n2)
 	return 0;
 }
 
-char *declarator_name(struct node *node)
+struct node *declarator_name(struct node *node)
 {
 	struct node *cur = node;
 	while (cur->count) {
@@ -63,6 +63,6 @@ char *declarator_name(struct node *node)
 			cur = cur->children[0];
 	}
 	if (cur->type == AST_IDENTIFIER)
-		return cur->data;
+		return cur;
 	return NULL;
 }

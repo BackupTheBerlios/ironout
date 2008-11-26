@@ -31,7 +31,7 @@ struct name {
 struct project;
 struct cfile;
 
-struct name *name_init(char *name, int flags);
+struct name *name_init(struct node *node, int flags);
 struct name *name_find(struct project *project,
 		       struct cfile *cfile, char *location);
 void name_free(struct name *name);

@@ -3,12 +3,21 @@
 #include "block.h"
 #include "hash.h"
 #include "name.h"
+#include "strutils.h"
 #include "utils.h"
 
 struct ref {
 	char *name;
 	int flags;
 };
+
+struct ref *ref_init(char *name, int flags)
+{
+	struct ref *result = xmalloc(sizeof(struct ref));
+	result->name = name;
+	result->flags = flags;
+	return result;
+}
 
 struct block *block_init(struct node *node)
 {
@@ -127,12 +136,12 @@ static void handle_enum(struct block *block, struct node *node)
 		return;
 	if (node->children[0]->type == AST_IDENTIFIER)
 		hash_put(block_names(block),
-			 name_init(node->children[0]->data, NAME_ENUM));
+			 name_init(node->children[0], NAME_ENUM));
 	for (i = 0; i < list->count; i++) {
 		/* ENUMLIST -> ENUMVAL -> IDENTIFIER */
 		struct node *child = list->children[i]->children[0];
 		hash_put(block_names(block),
-			 name_init(child->data, 0));
+			 name_init(child, 0));
 	}
 }
 
@@ -144,7 +153,7 @@ static void handle_struct(struct block *block, struct node *node)
 		int flags = node->children[0]->type == AST_STRUCTKW ?
 			NAME_STRUCT : NAME_UNION;
 		hash_put(block_names(block),
-			 name_init(node->children[1]->data, flags));
+			 name_init(node->children[1], flags));
 	}
 }
 
@@ -188,7 +197,7 @@ static int declinfo_flags(struct declinfo *declinfo)
 
 static void handle_function(struct block *block, struct node *node)
 {
-	char *name;
+	struct node *name;
 	struct declinfo declinfo;
 	memset(&declinfo, 0, sizeof(declinfo));
 	node_walk(node->children[0], analyze_declspec, &declinfo);
@@ -201,7 +210,7 @@ static void handle_function(struct block *block, struct node *node)
 
 static void add_declarator_name(struct declinfo *declinfo, struct node *decl)
 {
-	char *name;
+	struct node *name;
 	struct block *block = declinfo->block;
 	struct node *dirdecl = decl->children[decl->count - 1];
 	/* nothing to do for function declarations */
@@ -253,7 +262,7 @@ static void handle_parameters(struct block *block, struct node *node)
 	for (i = 0; i < node->count; i++) {
 		struct node *param = node->children[i];
 		if (param->count > 1) {
-			char *name = declarator_name(
+			struct node *name = declarator_name(
 				param->children[param->count - 1]);
 			if (name)
 				hash_put(block_names(block),
@@ -265,7 +274,7 @@ static void handle_parameters(struct block *block, struct node *node)
 static void handle_label(struct block *block, struct node *node)
 {
 	struct node *id = node->children[0];
-	hash_put(block_names(block), name_init(id->data, NAME_LABEL));
+	hash_put(block_names(block), name_init(id, NAME_LABEL));
 }
 
 static int find_names(struct node *node, void *data)
@@ -343,13 +352,9 @@ struct hash *block_names(struct block *block)
 
 struct ref *name_on(struct node *node)
 {
-	struct ref *ref;
 	if (node->type != AST_IDENTIFIER && node->type != AST_TYPENAME)
 		return NULL;
-	ref = xmalloc(sizeof(*ref));
-	ref->name = node->data;
-	ref->flags = guess_name_flags(node);
-	return ref;
+	return ref_init(node->data, guess_name_flags(node));
 }
 
 struct block *block_defining(struct block *block, struct node *node)
@@ -377,4 +382,66 @@ struct name *block_lookup(struct block *block, struct node *node)
 	}
 	free(ref);
 	return result;
+}
+
+struct {
+	char *name;
+	int flag;
+} tags[] = {{"struct ", NAME_STRUCT},
+	    {"enum ", NAME_ENUM},
+	    {"union ", NAME_UNION},
+	    {"label ", NAME_LABEL}};
+
+static struct ref *token_name(char *token)
+{
+	int flags = 0;
+	int i;
+	for (i = 0; i < LENGTH(tags); i++) {
+		if (startswith(token, tags[i].name)) {
+			token += strlen(tags[i].name);
+			flags |= tags[i].flag;
+			break;
+		}
+	}
+	return ref_init(token, flags);
+}
+
+static struct block *block_byname(struct block *block, char *name)
+{
+	struct block_list *blist = block_children(block);
+	while (blist) {
+		struct node *node = blist->block->node;
+		struct node *declname = declarator_name(node->children[1]);
+		if (node->type == AST_FUNCTION &&
+		    !strcmp(name, declname->data))
+			return blist->block;
+		blist = blist->next;
+	}
+	return NULL;
+}
+
+struct name *block_find_hier(struct block *block, char *location)
+{
+	char token[128];
+	char *newlocation = readtoken(token, location, ":");
+	struct block_list *blist = NULL;
+	if (*newlocation) {
+		struct block *newblock = block_byname(block, token);
+		if (newblock)
+			return block_find_hier(newblock, newlocation);
+	} else {
+		struct ref *key = token_name(token);
+		struct name *name = hash_get(block_names(block), key);
+		free(key);
+		if (name)
+			return name;
+	}
+	blist = block_children(block);
+	while (blist) {
+		struct name *name = block_find_hier(blist->block, location);
+		if (name)
+			return name;
+		blist = blist->next;
+	}
+	return NULL;
 }

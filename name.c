@@ -4,10 +4,10 @@
 #include "hash.h"
 #include "name.h"
 #include "utils.h"
-#include "strutils.h"
 
-struct name *name_init(char *name, int flags)
+struct name *name_init(struct node *node, int flags)
 {
+	char *name = node->data;
 	struct name *result = xmalloc(sizeof(struct name));
 	result->name = name;
 	result->flags = flags;
@@ -142,71 +142,10 @@ static struct name *name_at(struct project *project,
 	return NULL;
 }
 
-struct {
-	char *name;
-	int flag;
-} tags[] = {{"struct ", NAME_STRUCT},
-	    {"enum ", NAME_ENUM},
-	    {"union ", NAME_UNION},
-	    {"label ", NAME_LABEL}};
-
-static struct name *token_name(char *token)
-{
-	int flags = 0;
-	int i;
-	for (i = 0; i < LENGTH(tags); i++) {
-		if (startswith(token, tags[i].name)) {
-			token += strlen(tags[i].name);
-			flags |= tags[i].flag;
-			break;
-		}
-	}
-	return name_init(token, flags);
-}
-
-static struct block *block_byname(struct block *block, char *name)
-{
-	struct block_list *blist = block_children(block);
-	while (blist) {
-		struct node *node = blist->block->node;
-		if (node->type == AST_FUNCTION &&
-		    !strcmp(name, declarator_name(node->children[1])))
-			return blist->block;
-		blist = blist->next;
-	}
-	return NULL;
-}
-
-static struct name *name_hier(struct block *block, char *location)
-{
-	char token[128];
-	char *newlocation = readtoken(token, location, ":");
-	struct block_list *blist = NULL;
-	if (*newlocation) {
-		struct block *newblock = block_byname(block, token);
-		if (newblock)
-			return name_hier(newblock, newlocation);
-	} else {
-		struct name *key = token_name(token);
-		struct name *name = hash_get(block_names(block), key);
-		name_free(key);
-		if (name)
-			return name;
-	}
-	blist = block_children(block);
-	while (blist) {
-		struct name *name = name_hier(blist->block, location);
-		if (name)
-			return name;
-		blist = blist->next;
-	}
-	return NULL;
-}
-
 struct name *name_find(struct project *project,
 		       struct cfile *cfile, char *location)
 {
 	if (isdigit(location[0]))
 		return name_at(project, cfile, atoi(location));
-	return name_hier(cfile->block, location);
+	return block_find_hier(cfile->block, location);
 }
