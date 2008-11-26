@@ -32,4 +32,4 @@ clean:
 	rm -f cyacc.[ch] clex.c *.o
 	$(MAKE) -C tests/ clean
 ctags:
-	etags *.[hc]
+	ctags *.[hc]
