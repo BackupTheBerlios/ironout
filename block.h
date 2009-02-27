@@ -14,7 +14,7 @@ struct block {
 	struct block *parent;
 	struct block_list *_children;
 	struct hash *_names;
-	unsigned walked : 1;
+	unsigned walked:1;
 };
 
 struct block *block_init(struct node *node);
