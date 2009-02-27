@@ -133,7 +133,7 @@ static void print_version(int argc, char **argv)
 int main(int argc, char **argv)
 {
 	int c;
-	while ((c = getopt (argc, argv, "vh")) != -1) {
+	while ((c = getopt(argc, argv, "vh")) != -1) {
 		switch (c) {
 		case 'v':
 			print_version(argc, argv);
